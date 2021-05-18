@@ -1,0 +1,18 @@
+# Add any directories, files, or patterns you don't want to be tracked by version control
+*.class
+bin/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+.classpath
+.project
+.settings/
+data.csv
+totals.csv
+regions/*.mca
+temp-*.txt
+target/
