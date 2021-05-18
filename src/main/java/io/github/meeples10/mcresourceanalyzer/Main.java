@@ -128,7 +128,7 @@ public class Main {
             }
         }
         try {
-            writeStringToFile(new File("temp-" + System.currentTimeMillis() + ".txt"), debug);
+            writeStringToFile(new File("chunk-" + chunkX + "." + chunkZ + ".txt"), debug);
         } catch(IOException e) {
             e.printStackTrace();
         }

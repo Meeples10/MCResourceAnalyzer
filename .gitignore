@@ -13,6 +13,5 @@ hs_err_pid*
 .settings/
 data.csv
 totals.csv
-regions/*.mca
-temp-*.txt
+chunk-*.txt
 target/
