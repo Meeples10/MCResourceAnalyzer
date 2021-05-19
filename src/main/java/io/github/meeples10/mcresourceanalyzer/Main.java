@@ -71,7 +71,7 @@ public class Main {
         heightCounter = heightCounter.entrySet().stream().sorted(Map.Entry.comparingByKey(new Comparator<String>() {
             @Override
             public int compare(String arg0, String arg1) {
-                return Long.compare(blockCounter.get(arg0), blockCounter.get(arg1));
+                return Long.compare(blockCounter.get(arg1), blockCounter.get(arg0));
             }
         })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         System.out.println("Done");
@@ -93,16 +93,16 @@ public class Main {
             data += key + ",";
             for(int i = 0; i < 256; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
-                    data += "0";
+                    data += "0,";
                 } else {
-                    data += heightCounter.get(key).get(i);
+                    data += heightCounter.get(key).get(i) + ",";
                 }
-                data += "," + blockCounter.get(key) + "," + ((double) blockCounter.get(key) / (double) totalBlocks);
-                if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
-                    data += ",N/A";
-                } else {
-                    data += "," + ((double) blockCounter.get(key) / totalExcludingAir);
-                }
+            }
+            data += blockCounter.get(key) + "," + ((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d;
+            if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
+                data += ",N/A";
+            } else {
+                data += "," + ((double) blockCounter.get(key) / totalExcludingAir) * 100.0d;
             }
             data += "\n";
         }
@@ -128,7 +128,8 @@ public class Main {
     }
 
     private static void analyzeChunk(int chunkX, int chunkZ, NBTTagList sections) {
-        for(int i = 0; i < sections.tagCount(); i++) {
+        int i = 0;
+        for(; i < sections.tagCount(); i++) {
             NBTTagCompound tag = sections.getCompoundTagAt(i);
 
             NBTTagLongArray blockStatesTag = ((NBTTagLongArray) tag.getTag("BlockStates"));
@@ -160,6 +161,19 @@ public class Main {
                         } else {
                             heightCounter.get(blockName).put(actualY, 1L);
                         }
+                    }
+                }
+            }
+        }
+        // XXX: THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES
+        if(i < 15) {
+            for(; i < 16; i++) {
+                blockCounter.put("minecraft:air", blockCounter.get("minecraft:air") + 4096L);
+                for(int y = i * 16; y < i * 16 + 16; y++) {
+                    if(heightCounter.get("minecraft:air").containsKey(y)) {
+                        heightCounter.get("minecraft:air").put(y, heightCounter.get("minecraft:air").get(y) + 256L);
+                    } else {
+                        heightCounter.get("minecraft:air").put(y, 256L);
                     }
                 }
             }
