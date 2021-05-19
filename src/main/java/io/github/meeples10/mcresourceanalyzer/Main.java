@@ -26,8 +26,19 @@ public class Main {
     private static long chunkCount = 0;
     public static Map<String, Long> blockCounter = new HashMap<String, Long>();
     public static Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
+    private static boolean saveStatistics = false;
+    private static boolean allowHack = true;
 
     public static void main(String[] args) {
+        for(String arg : args) {
+            if(arg.equalsIgnoreCase("statistics")) {
+                saveStatistics = true;
+            } else if(arg.equalsIgnoreCase("no-hack")) {
+                allowHack = false;
+            }
+        }
+        System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
+                + "\n--------------------------------");
         long firstStartTime = System.currentTimeMillis();
         int totalRegions = rf.listFiles().length;
         System.out.println(totalRegions + " regions found");
@@ -55,11 +66,7 @@ public class Main {
             rnum++;
         }
         long duration = System.currentTimeMillis() - firstStartTime;
-        System.out.println(("Completed analysis in "
-                + String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(duration),
-                        TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1),
-                        TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1), duration % 1000)
-                + " (" + chunkCount + " chunks)"));
+        System.out.println(("Completed analysis in " + millisToHMS(duration) + " (" + chunkCount + " chunks)"));
         long totalBlocks = 0L;
         for(String key : blockCounter.keySet()) {
             totalBlocks += blockCounter.get(key);
@@ -78,7 +85,14 @@ public class Main {
 
         double totalExcludingAir = (double) (totalBlocks - blockCounter.get("minecraft:air")
                 - blockCounter.get("minecraft:cave_air"));
-        String data = "id,";
+        System.out.print("Generating CSV... ");
+        String data = "";
+        if(saveStatistics) {
+            data += "chunk-count=" + chunkCount + ",unique-blocks=" + blockCounter.size() + ",total-blocks="
+                    + totalBlocks + ",duration-millis=" + duration + ",duration-readable=" + millisToHMS(duration)
+                    + "\n";
+        }
+        data += "id,";
         for(int i = 0; i < 256; i++) {
             data += i + ",";
         }
@@ -86,7 +100,6 @@ public class Main {
         int digits = String.valueOf(blockCounter.size()).length();
         String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
         int keyIndex = 0;
-        System.out.print("Generating CSV... ");
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
             System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
@@ -114,11 +127,7 @@ public class Main {
             e.printStackTrace();
             System.exit(1);
         }
-        duration = System.currentTimeMillis() - firstStartTime;
-        System.out.println(
-                "Completed after " + String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(duration),
-                        TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1),
-                        TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1), duration % 1000));
+        System.out.println("Completed after " + millisToHMS(System.currentTimeMillis() - firstStartTime));
     }
 
     private static void processRegion(RegionFile r, String name, int x, int z) throws Exception {
@@ -165,8 +174,8 @@ public class Main {
                 }
             }
         }
-        // XXX: THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES
-        if(i < 15) {
+        // THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES
+        if(allowHack && i < 15) {
             for(; i < 16; i++) {
                 blockCounter.put("minecraft:air", blockCounter.get("minecraft:air") + 4096L);
                 for(int y = i * 16; y < i * 16 + 16; y++) {
@@ -181,7 +190,7 @@ public class Main {
     }
 
     private static String formatRegionName(File f) {
-        return f.getPath().split("region")[1].substring(4).replace(".mca", "");
+        return f.getPath().split("region")[1].substring(1);
     }
 
     private static int[] unstream(int bitsPerValue, int wordSize, boolean slack, long[] data) {
@@ -233,5 +242,11 @@ public class Main {
                 out.close();
             } catch(IOException ignore) {}
         }
+    }
+
+    private static String millisToHMS(long millis) {
+        return String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1), millis % 1000);
     }
 }
