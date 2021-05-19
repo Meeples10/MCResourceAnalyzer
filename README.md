@@ -1,4 +1,4 @@
-# MinecraftResourceAnalyzer
+# Minecraft Resource Analyzer
 
 For more information, see [this page](https://meeples10.github.io/resource-distribution.html).
 
