@@ -12,6 +12,5 @@ hs_err_pid*
 .project
 .settings/
 data.csv
-totals.csv
 target/
 regions/

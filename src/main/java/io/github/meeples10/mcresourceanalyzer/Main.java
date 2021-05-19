@@ -6,10 +6,14 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -50,33 +54,42 @@ public class Main {
                     "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
             rnum++;
         }
-        System.out.println(
-                ("Completed in " + String.format("%.2f", (double) (System.currentTimeMillis() - firstStartTime) / 1000)
-                        + "s (" + chunkCount + " chunks)"));
+        long duration = System.currentTimeMillis() - firstStartTime;
+        System.out.println(("Completed analysis in "
+                + String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(duration),
+                        TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1),
+                        TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1), duration % 1000)
+                + " (" + chunkCount + " chunks)"));
         long totalBlocks = 0L;
         for(String key : blockCounter.keySet()) {
             totalBlocks += blockCounter.get(key);
         }
         System.out.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
-                + " blocks total");
-        String output = "";
-        for(String key : blockCounter.keySet()) {
-            output += key + "," + blockCounter.get(key) + ","
-                    + (((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d) + "\n";
-        }
+                + " blocks total\n--------------------------------");
 
-        try {
-            writeStringToFile(new File("totals.csv"), output);
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
+        System.out.print("Sorting data... ");
+        heightCounter = heightCounter.entrySet().stream().sorted(Map.Entry.comparingByKey(new Comparator<String>() {
+            @Override
+            public int compare(String arg0, String arg1) {
+                return Long.compare(blockCounter.get(arg0), blockCounter.get(arg1));
+            }
+        })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        System.out.println("Done");
 
+        double totalExcludingAir = (double) (totalBlocks - blockCounter.get("minecraft:air")
+                - blockCounter.get("minecraft:cave_air"));
         String data = "id,";
         for(int i = 0; i < 256; i++) {
             data += i + ",";
         }
-        data += "\n";
+        data += "total,percent_of_total,percent_excluding_air\n";
+        int digits = String.valueOf(blockCounter.size()).length();
+        String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
+        int keyIndex = 0;
+        System.out.print("Generating CSV... ");
         for(String key : heightCounter.keySet()) {
+            keyIndex += 1;
+            System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data += key + ",";
             for(int i = 0; i < 256; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
@@ -84,16 +97,28 @@ public class Main {
                 } else {
                     data += heightCounter.get(key).get(i);
                 }
-                data += ",";
+                data += "," + blockCounter.get(key) + "," + ((double) blockCounter.get(key) / (double) totalBlocks);
+                if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
+                    data += ",N/A";
+                } else {
+                    data += "," + ((double) blockCounter.get(key) / totalExcludingAir);
+                }
             }
             data += "\n";
         }
-
         try {
-            writeStringToFile(new File("data.csv"), data);
+            File out = new File("data.csv");
+            writeStringToFile(out, data);
+            System.out.println("\nData written to " + out.getAbsolutePath());
         } catch(IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
+        duration = System.currentTimeMillis() - firstStartTime;
+        System.out.println(
+                "Completed after " + String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(duration),
+                        TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1),
+                        TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1), duration % 1000));
     }
 
     private static void processRegion(RegionFile r, String name, int x, int z) throws Exception {
@@ -119,8 +144,22 @@ public class Main {
                 for(int x = 0; x < 16; x++) {
                     for(int z = 0; z < 16; z++) {
                         int actualY = sectionY * 16 + y;
-                        int pos = y * 16 * 16 + z * 16 + x;
-                        // TODO
+                        String block = palette.getStringTagAt(blocks[y * 16 * 16 + z * 16 + x]);
+                        int startIndex = block.indexOf("Name:\"");
+                        String blockName = block.substring(startIndex + 6, block.indexOf('"', startIndex + 6));
+                        if(blockCounter.containsKey(blockName)) {
+                            blockCounter.put(blockName, blockCounter.get(blockName) + 1L);
+                        } else {
+                            blockCounter.put(blockName, 1L);
+                        }
+                        if(!heightCounter.containsKey(blockName)) {
+                            heightCounter.put(blockName, new HashMap<Integer, Long>());
+                        }
+                        if(heightCounter.get(blockName).containsKey(actualY)) {
+                            heightCounter.get(blockName).put(actualY, heightCounter.get(blockName).get(actualY) + 1L);
+                        } else {
+                            heightCounter.get(blockName).put(actualY, 1L);
+                        }
                     }
                 }
             }
