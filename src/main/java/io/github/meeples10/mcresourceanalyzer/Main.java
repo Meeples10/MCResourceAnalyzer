@@ -21,7 +21,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLongArray;
 
 public class Main {
-    private static File rf = new File("regions");
+    private static File rf = new File("region");
     private static DateFormat date = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
     private static long chunkCount = 0;
     public static Map<String, Long> blockCounter = new HashMap<String, Long>();
