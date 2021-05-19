@@ -13,5 +13,5 @@ hs_err_pid*
 .settings/
 data.csv
 totals.csv
-chunk-*.txt
 target/
+regions/

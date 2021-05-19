@@ -103,7 +103,6 @@ public class Main {
     }
 
     private static void analyzeChunk(int chunkX, int chunkZ, NBTTagList sections) {
-        String debug = "";
         for(int i = 0; i < sections.tagCount(); i++) {
             NBTTagCompound tag = sections.getCompoundTagAt(i);
 
@@ -121,16 +120,10 @@ public class Main {
                     for(int z = 0; z < 16; z++) {
                         int actualY = sectionY * 16 + y;
                         int pos = y * 16 * 16 + z * 16 + x;
-                        debug += String.format("{%d, %d} [(%d, %d) %d, %d (%d), %d] %s\n", chunkX, chunkZ, i, sectionY,
-                                x, y, actualY, z, palette.getStringTagAt(blocks[pos]));
+                        // TODO
                     }
                 }
             }
-        }
-        try {
-            writeStringToFile(new File("chunk-" + chunkX + "." + chunkZ + ".txt"), debug);
-        } catch(IOException e) {
-            e.printStackTrace();
         }
     }
 
