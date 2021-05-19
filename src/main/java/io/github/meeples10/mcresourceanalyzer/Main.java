@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,19 +27,24 @@ public class Main {
     private static long chunkCount = 0;
     public static Map<String, Long> blockCounter = new HashMap<String, Long>();
     public static Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
+    private static DecimalFormat decimalFormat = new DecimalFormat("0.##########");
     private static boolean saveStatistics = false;
     private static boolean allowHack = true;
+    private static boolean generateTable = false;
 
     public static void main(String[] args) {
+        decimalFormat.setMaximumFractionDigits(10);
         for(String arg : args) {
             if(arg.equalsIgnoreCase("statistics")) {
                 saveStatistics = true;
             } else if(arg.equalsIgnoreCase("no-hack")) {
                 allowHack = false;
+            } else if(arg.equalsIgnoreCase("table")) {
+                generateTable = true;
             }
         }
         System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
-                + "\n--------------------------------");
+                + "\nGenerate HTML table: " + generateTable + "\n--------------------------------");
         long firstStartTime = System.currentTimeMillis();
         int totalRegions = rf.listFiles().length;
         System.out.println(totalRegions + " regions found");
@@ -111,11 +117,12 @@ public class Main {
                     data += heightCounter.get(key).get(i) + ",";
                 }
             }
-            data += blockCounter.get(key) + "," + ((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d;
+            data += blockCounter.get(key) + ","
+                    + decimalFormat.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d);
             if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
                 data += ",N/A";
             } else {
-                data += "," + ((double) blockCounter.get(key) / totalExcludingAir) * 100.0d;
+                data += "," + decimalFormat.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d);
             }
             data += "\n";
         }
@@ -126,6 +133,16 @@ public class Main {
         } catch(IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+        if(generateTable) {
+            try {
+                File out = new File("table.html");
+                writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
+                System.out.println("\nTable written to " + out.getAbsolutePath());
+            } catch(IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
         System.out.println("Completed after " + millisToHMS(System.currentTimeMillis() - firstStartTime));
     }
@@ -248,5 +265,39 @@ public class Main {
         return String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(millis),
                 TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1), millis % 1000);
+    }
+
+    private static String generateTable(double totalBlocks, double totalExcludingAir) {
+        String data = "<table>\n";
+        data += "<tr><th>id</th><th>";
+        for(int i = 0; i < 256; i++) {
+            data += i + "</th><th>";
+        }
+        data += "total</th><th>percent_of_total</th><th>percent_excluding_air</th></tr>\n<tr>";
+        int digits = String.valueOf(blockCounter.size()).length();
+        String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
+        int keyIndex = 0;
+        for(String key : heightCounter.keySet()) {
+            keyIndex += 1;
+            System.out.print("\rGenerating table... " + String.format(completionFormat, keyIndex, blockCounter.size()));
+            data += "<td>" + key + "</td>";
+            for(int i = 0; i < 256; i++) {
+                if(!heightCounter.get(key).containsKey(i)) {
+                    data += "<td>0</td>";
+                } else {
+                    data += "<td>" + heightCounter.get(key).get(i) + "</td>";
+                }
+            }
+            data += "<td>" + blockCounter.get(key) + "</td><td>"
+                    + decimalFormat.format(((double) blockCounter.get(key) / totalBlocks) * 100.0d) + "</td>";
+            if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
+                data += "<td>N/A</td>";
+            } else {
+                data += "<td>" + decimalFormat.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d)
+                        + "</td>";
+            }
+            data += "</tr>\n<tr>";
+        }
+        return data.substring(0, data.length() - 4) + "</table>";
     }
 }

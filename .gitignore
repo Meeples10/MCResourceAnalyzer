@@ -12,5 +12,6 @@ hs_err_pid*
 .project
 .settings/
 data.csv
+table.html
 target/
 region/
