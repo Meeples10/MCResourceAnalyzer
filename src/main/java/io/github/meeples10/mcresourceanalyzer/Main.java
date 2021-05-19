@@ -209,7 +209,11 @@ public class Main {
     private static String formatRegionName(File f) {
         return f.getPath().split("region")[1].substring(1);
     }
-
+    /**
+     * @author Estragon#9379
+     * 
+     * <p>Many thanks to Estragon#9379 on Discord for this code.</p>
+     */
     private static int[] unstream(int bitsPerValue, int wordSize, boolean slack, long[] data) {
         // in: bits per value, word size, ignore spare bits, data
         // out: decoded array
