@@ -47,7 +47,15 @@ public class Main {
         System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
                 + "\nGenerate HTML table: " + generateTable + "\n--------------------------------");
         long firstStartTime = System.currentTimeMillis();
+        if(!rf.exists()) {
+            System.out.println("Error: No region directory found at " + rf.getAbsolutePath());
+            System.exit(1);
+        }
         int totalRegions = rf.listFiles().length;
+        if(totalRegions == 0) {
+            System.out.println("Error: Region directory is empty");
+            System.exit(1);
+        }
         System.out.println(totalRegions + " regions found");
         int rnum = 1;
         for(File f : rf.listFiles()) {
