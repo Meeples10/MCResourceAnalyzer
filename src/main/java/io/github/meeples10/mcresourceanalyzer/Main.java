@@ -1,5 +1,6 @@
 package io.github.meeples10.mcresourceanalyzer;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -58,7 +59,6 @@ public class Main {
             for(int x = 0; x < 32; x++) {
                 for(int z = 0; z < 32; z++) {
                     if(r.hasChunk(x, z)) {
-                        chunkCount++;
                         try {
                             processRegion(r, name, x, z);
                         } catch(Exception e) {
@@ -148,9 +148,15 @@ public class Main {
     }
 
     private static void processRegion(RegionFile r, String name, int x, int z) throws Exception {
+        DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
+        if(chunkDataInputStream == null) {
+            // Skip malformed chunks
+            return;
+        }
         NBTTagList sections = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
                 .getTagList("Sections", 10);
         analyzeChunk(x, z, sections);
+        chunkCount++;
     }
 
     private static void analyzeChunk(int chunkX, int chunkZ, NBTTagList sections) {
@@ -209,6 +215,7 @@ public class Main {
     private static String formatRegionName(File f) {
         return f.getPath().split("region")[1].substring(1);
     }
+
     /**
      * @author Estragon#9379
      * 
