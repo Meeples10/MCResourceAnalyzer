@@ -97,8 +97,9 @@ public class Main {
         })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         System.out.println("Done");
 
-        double totalExcludingAir = (double) (totalBlocks - blockCounter.get("minecraft:air")
-                - blockCounter.get("minecraft:cave_air"));
+        double totalExcludingAir = (double) (totalBlocks
+                - (blockCounter.containsKey("minecraft:air") ? blockCounter.get("minecraft:air") : 0)
+                - (blockCounter.containsKey("minecraft:cave_air") ? blockCounter.get("minecraft:cave_air") : 0));
         System.out.print("Generating CSV... ");
         String data = "";
         if(saveStatistics) {
