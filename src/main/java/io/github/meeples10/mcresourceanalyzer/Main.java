@@ -207,6 +207,9 @@ public class Main {
         }
         // THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES
         if(allowHack && i < 15) {
+            if(!blockCounter.containsKey("minecraft:air")) blockCounter.put("minecraft:air", 0L);
+            if(!heightCounter.containsKey("minecraft:air"))
+                heightCounter.put("minecraft:air", new HashMap<Integer, Long>());
             for(; i < 16; i++) {
                 blockCounter.put("minecraft:air", blockCounter.get("minecraft:air") + 4096L);
                 for(int y = i * 16; y < i * 16 + 16; y++) {
