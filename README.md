@@ -17,3 +17,12 @@ Note that the numbers for `minecraft:air` may be inaccurate at high Y values due
 To generate a simple HTML table from the collected data, use the argument `table`.
 
 Multiple command line options can be used at once.
+
+## Version compatibility
+
+MCResourceAnalyzer 1.0.1 can analyze worlds generated with the following versions of Minecraft (Java Edition):
+
+- 1.17
+- 1.16
+
+Support for more versions will be added in a future release.
