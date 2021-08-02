@@ -5,7 +5,7 @@
 
 	<groupId>io.github.meeples10.mcresourceanalyzer</groupId>
 	<artifactId>mc-resource-analyzer</artifactId>
-	<version>1.1.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<properties>
