@@ -71,17 +71,17 @@ public abstract class RegionAnalyzer {
     }
 
     /* THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES */
-    void airHack(int sectionY) {
+    void airHack(int sectionY, String airID) {
         if(Main.allowHack && sectionY < 15) {
-            if(!blockCounter.containsKey("0")) blockCounter.put("0", 0L);
-            if(!heightCounter.containsKey("0")) heightCounter.put("0", new HashMap<Integer, Long>());
+            if(!blockCounter.containsKey(airID)) blockCounter.put(airID, 0L);
+            if(!heightCounter.containsKey(airID)) heightCounter.put(airID, new HashMap<Integer, Long>());
             for(; sectionY < 16; sectionY++) {
-                blockCounter.put("0", blockCounter.get("0") + 4096L);
+                blockCounter.put(airID, blockCounter.get(airID) + 4096L);
                 for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
-                    if(heightCounter.get("0").containsKey(y)) {
-                        heightCounter.get("0").put(y, heightCounter.get("0").get(y) + 256L);
+                    if(heightCounter.get(airID).containsKey(y)) {
+                        heightCounter.get(airID).put(y, heightCounter.get(airID).get(y) + 256L);
                     } else {
-                        heightCounter.get("0").put(y, 256L);
+                        heightCounter.get(airID).put(y, 256L);
                     }
                 }
             }
@@ -89,11 +89,13 @@ public abstract class RegionAnalyzer {
     }
 
     public enum Version {
-        ANVIL_2021("Anvil (1.16 to 1.17)", RegionAnalyzerAnvil2021.class), ANVIL_2012("Anvil (1.2 to 1.12)",
-                RegionAnalyzerAnvil2012.class), MCREGION("McRegion (Beta 1.3 to 1.1)",
-                        RegionAnalyzerMCRegion.class), ALPHA("Alpha (Infdev 20100327 to Beta 1.2)",
-                                RegionAnalyzerAlpha.class), INDEV("Indev (Indev 0.31 20100122 to Infdev 20100325)",
-                                        RegionAnalyzerIndev.class);
+        ANVIL_2021("Anvil (1.16 to 1.17)", RegionAnalyzerAnvil2021.class), ANVIL_2018("Anvil (1.13 to 1.15)",
+                RegionAnalyzerAnvil2018.class), ANVIL_2012("Anvil (1.2 to 1.12)",
+                        RegionAnalyzerAnvil2012.class), MCREGION("McRegion (Beta 1.3 to 1.1)",
+                                RegionAnalyzerMCRegion.class), ALPHA("Alpha (Infdev 20100327 to Beta 1.2)",
+                                        RegionAnalyzerAlpha.class), INDEV(
+                                                "Indev (Indev 0.31 20100122 to Infdev 20100325)",
+                                                RegionAnalyzerIndev.class);
 
         private final String versionName;
         private final Class<? extends RegionAnalyzer> analyzerClass;
