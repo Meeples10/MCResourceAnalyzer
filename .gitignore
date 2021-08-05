@@ -16,4 +16,5 @@ table.html
 target/
 region/
 region*/
-sections*.nbt
+*.nbt
+*.mclevel
