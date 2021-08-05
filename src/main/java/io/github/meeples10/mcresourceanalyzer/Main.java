@@ -39,6 +39,8 @@ public class Main {
                 versionSelect = true;
             } else if(arg.equalsIgnoreCase("modernize-ids")) {
                 modernizeIDs = true;
+            } else {
+                System.err.println("Unknown argument: " + arg);
             }
         }
         System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
