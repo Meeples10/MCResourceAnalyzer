@@ -1,53 +1,54 @@
 package io.github.meeples10.mcresourceanalyzer;
 
-import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class RegionAnalyzerMCRegion extends RegionAnalyzer {
+public class RegionAnalyzerAlpha extends RegionAnalyzer {
 
     @Override
-    public void analyze(File regionDir) {
-        if(!regionDir.exists()) {
-            System.out.println("Error: No region directory found at " + regionDir.getAbsolutePath());
+    public void analyze(File world) {
+        if(!world.exists()) {
+            System.out.println("Error: No world directory found at " + world.getAbsolutePath());
             System.exit(1);
         }
-        int totalRegions = regionDir.listFiles().length;
-        if(totalRegions == 0) {
-            System.out.println("Error: Region directory is empty");
+
+        List<File> chunkFiles = new ArrayList<>();
+        for(File f : world.listFiles()) {
+            if(!f.isDirectory()) continue;
+            chunkFiles.addAll(traverseSubdirectories(f));
+        }
+
+        if(chunkFiles.size() == 0) {
+            System.out.println("Error: World directory is empty");
             System.exit(1);
         }
-        System.out.println(totalRegions + " regions found");
-        int rnum = 1;
-        for(File f : regionDir.listFiles()) {
+        System.out.println(chunkFiles.size() + " chunks found");
+        int cnum = 1;
+        for(File f : chunkFiles) {
             long startTime = System.currentTimeMillis();
-            String name = Main.formatRegionName(f);
-            RegionFile r = new RegionFile(f);
-            System.out.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
-                    + Main.DATE_FORMAT.format(new Date(r.lastModified())) + ")... ");
-            for(int x = 0; x < 32; x++) {
-                for(int z = 0; z < 32; z++) {
-                    if(r.hasChunk(x, z)) {
-                        try {
-                            processRegion(r, name, x, z);
-                        } catch(Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+            String name = f.getName();
+            System.out.print("Scanning chunk " + name + " [" + cnum + "/" + chunkFiles.size() + "]... ");
+
+            try {
+                processChunk(f);
+            } catch(Exception e) {
+                e.printStackTrace();
             }
+
             System.out.println(
                     "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
-            rnum++;
+            cnum++;
         }
         long duration = System.currentTimeMillis() - getStartTime();
         System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
@@ -123,13 +124,9 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
         }
     }
 
-    private void processRegion(RegionFile r, String name, int x, int z) throws Exception {
-        DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
-        if(chunkDataInputStream == null) {
-            // Skip malformed chunks
-            return;
-        }
-        NBTTagCompound level = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level");
+    private void processChunk(File chunkFile) throws Exception {
+        NBTTagCompound chunk = CompressedStreamTools.readCompressed(new FileInputStream(chunkFile));
+        NBTTagCompound level = chunk.getCompoundTag("Level");
         byte[] blocks = level.getByteArray("Blocks");
         byte[] rawData = level.getByteArray("Data");
         byte[] data = new byte[rawData.length * 2];
@@ -176,5 +173,17 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
                 }
             }
         }
+    }
+
+    private static List<File> traverseSubdirectories(File root) {
+        List<File> files = new ArrayList<>();
+        for(File f : root.listFiles()) {
+            if(f.isDirectory()) {
+                files.addAll(traverseSubdirectories(f));
+            } else {
+                files.add(f);
+            }
+        }
+        return files;
     }
 }
