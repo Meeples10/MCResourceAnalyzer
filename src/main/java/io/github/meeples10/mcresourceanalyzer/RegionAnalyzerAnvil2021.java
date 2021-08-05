@@ -178,21 +178,6 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
                 }
             }
         }
-        // THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES
-        if(Main.allowHack && i < 15) {
-            if(!blockCounter.containsKey("minecraft:air")) blockCounter.put("minecraft:air", 0L);
-            if(!heightCounter.containsKey("minecraft:air"))
-                heightCounter.put("minecraft:air", new HashMap<Integer, Long>());
-            for(; i < 16; i++) {
-                blockCounter.put("minecraft:air", blockCounter.get("minecraft:air") + 4096L);
-                for(int y = i * 16; y < i * 16 + 16; y++) {
-                    if(heightCounter.get("minecraft:air").containsKey(y)) {
-                        heightCounter.get("minecraft:air").put(y, heightCounter.get("minecraft:air").get(y) + 256L);
-                    } else {
-                        heightCounter.get("minecraft:air").put(y, 256L);
-                    }
-                }
-            }
-        }
+        airHack(i);
     }
 }
