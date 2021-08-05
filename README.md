@@ -27,6 +27,6 @@ Several command line arguments may be used to modify the behavior of the program
 MCResourceAnalyzer 1.0.1 can analyze worlds generated with the following versions of Minecraft (Java Edition):
 
 - 1.16 to 1.17
-- Infdev to 1.1
+- Indev 0.31 20100122 to 1.1
 
 Support for more versions will be added in a future release.
