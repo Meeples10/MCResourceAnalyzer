@@ -24,6 +24,8 @@ Several command line arguments may be used to modify the behavior of the program
 - `version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Shows a popup on launch that allows the version in which the region files were generated to be selected. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior.
 - `modernize-ids`: If analyzing regions saved before 1.13, numeric block IDs will be replaced with their modern string representations. If no string corresponding to the numeric ID is found, the numeric ID will be saved instead.
 
-## Version compatibility
+### Version compatibility
 
 MCResourceAnalyzer 1.1.0 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.17.
+
+Note that Indev worlds with the `Long` world shape are not supported.
