@@ -29,3 +29,7 @@ Several command line arguments may be used to modify the behavior of the program
 MCResourceAnalyzer 1.1.0 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.17.
 
 Note that Indev worlds with the `Long` and `Deep` world shapes are not supported.
+
+
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/donate?business=ZXKMCY4HP34BG&no_recurring=0&item_name=Developing+Software&currency_code=USD)
