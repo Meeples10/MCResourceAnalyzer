@@ -53,7 +53,7 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
                     + "\n";
         }
         data += "id,";
-        for(int i = 0; i < 256; i++) {
+        for(int i = 0; i < 128; i++) {
             data += i + ",";
         }
         data += "total,percent_of_total,percent_excluding_air\n";
@@ -64,7 +64,7 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
             keyIndex += 1;
             System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data += (Main.modernizeIDs ? Main.getStringID(key) : key) + ",";
-            for(int i = 0; i < 256; i++) {
+            for(int i = 0; i < 128; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
                     data += "0,";
                 } else {
