@@ -185,20 +185,6 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
                 }
             }
         }
-        // THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES
-        if(Main.allowHack && i < 15) {
-            if(!blockCounter.containsKey("0")) blockCounter.put("0", 0L);
-            if(!heightCounter.containsKey("0")) heightCounter.put("0", new HashMap<Integer, Long>());
-            for(; i < 16; i++) {
-                blockCounter.put("0", blockCounter.get("0") + 4096L);
-                for(int y = i * 16; y < i * 16 + 16; y++) {
-                    if(heightCounter.get("0").containsKey(y)) {
-                        heightCounter.get("0").put(y, heightCounter.get("0").get(y) + 256L);
-                    } else {
-                        heightCounter.get("0").put(y, 256L);
-                    }
-                }
-            }
-        }
+        airHack(i);
     }
 }

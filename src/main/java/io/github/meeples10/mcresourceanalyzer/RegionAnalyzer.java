@@ -62,12 +62,30 @@ public abstract class RegionAnalyzer {
         return firstStartTime;
     }
 
-    boolean mergeStates(int id) {
+    static boolean mergeStates(int id) {
         return BLOCKS_TO_MERGE.contains((int) id);
     }
 
-    boolean mergeStates(byte id) {
+    static boolean mergeStates(byte id) {
         return mergeStates((int) id);
+    }
+
+    /* THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES */
+    void airHack(int sectionY) {
+        if(Main.allowHack && sectionY < 15) {
+            if(!blockCounter.containsKey("0")) blockCounter.put("0", 0L);
+            if(!heightCounter.containsKey("0")) heightCounter.put("0", new HashMap<Integer, Long>());
+            for(; sectionY < 16; sectionY++) {
+                blockCounter.put("0", blockCounter.get("0") + 4096L);
+                for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
+                    if(heightCounter.get("0").containsKey(y)) {
+                        heightCounter.get("0").put(y, heightCounter.get("0").get(y) + 256L);
+                    } else {
+                        heightCounter.get("0").put(y, 256L);
+                    }
+                }
+            }
+        }
     }
 
     public enum Version {
