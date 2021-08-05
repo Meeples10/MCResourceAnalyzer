@@ -1,27 +1,33 @@
 package io.github.meeples10.mcresourceanalyzer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
 public class Main {
-    public static DateFormat date = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
-    public static DecimalFormat decimalFormat = new DecimalFormat("0.##########");
+    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
+    public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.##########");
+    public static final Map<String, String> BLOCK_NAMES = new HashMap<>();
     static boolean saveStatistics = false;
     static boolean allowHack = true;
     static boolean generateTable = false;
     static boolean versionSelect = false;
+    static boolean modernizeIDs = false;
 
     public static void main(String[] args) {
-        decimalFormat.setMaximumFractionDigits(10);
+        DECIMAL_FORMAT.setMaximumFractionDigits(10);
         for(String arg : args) {
             if(arg.equalsIgnoreCase("statistics")) {
                 saveStatistics = true;
@@ -31,11 +37,18 @@ public class Main {
                 generateTable = true;
             } else if(arg.equalsIgnoreCase("version-select")) {
                 versionSelect = true;
+            } else if(arg.equalsIgnoreCase("modernize-ids")) {
+                modernizeIDs = true;
             }
         }
         System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
                 + "\nGenerate HTML table: " + generateTable + "\nVersion select: " + versionSelect
-                + "\n--------------------------------");
+                + "\nModernize block IDs: " + modernizeIDs + "\n--------------------------------");
+        try {
+            loadBlockNames();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
         RegionAnalyzer analyzer;
         if(versionSelect) {
             Object selectedVersion = JOptionPane.showInputDialog(null,
@@ -126,5 +139,20 @@ public class Main {
         return String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(millis),
                 TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1), millis % 1000);
+    }
+
+    private static void loadBlockNames() throws IOException {
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(Main.class.getResourceAsStream("/blocks.properties")));
+        String line;
+        while((line = reader.readLine()) != null) {
+            if(line.length() == 0) continue;
+            String[] split = line.split("=", 2);
+            BLOCK_NAMES.put(split[0], split[1]);
+        }
+    }
+
+    public static String getStringID(String id) {
+        return BLOCK_NAMES.getOrDefault(id, id);
     }
 }

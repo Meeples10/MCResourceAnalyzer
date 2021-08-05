@@ -10,19 +10,23 @@ This is a standalone program created to replace [this plugin](https://github.com
 2. Copy the `region` directory from your Minecraft world into the same directory as the program (`mc-resource-analyzer-x.x.x.jar`).
 3. Run the JAR with `java -jar mc-resource-analyzer-x.x.x.jar`, or by double-clicking it. After analyzing the regions, the program will create a file in the same directory named `data.csv`.
 
-To include a line with statistics at the beginning of the `data.csv` file, run the JAR with argument `statistics` (e.g. `java -jar mc-resource-analyzer-x.x.x.jar statistics`).
+Note that the numbers for `minecraft:air` may be inaccurate at high Y values due to how Minecraft stores chunks.
 
-Note that the numbers for `minecraft:air` may be inaccurate at high Y values due to how Minecraft stores chunks. The program attempts to compensate for this by assuming that empty chunk sections are filled with air. To disable these assumptions and only save the actual data read from the region files, run the JAR with the argument `no-hack`.
+### Command line arguments
 
-To generate a simple HTML table from the collected data, use the argument `table`.
+Several command line arguments may be used to modify the behavior of the program. Multiple arguments can be used at once (e.g. `java -jar mc-resource-analyzer-x.x.x.jar table air-hack`). All available arguments are listed below.
 
-Multiple command line options can be used at once.
+- `statistics`: Adds a line with statistics at the beginning of the `data.csv` file.
+- `air-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air.
+- `table`: Generates a simple HTML table with the collected data.
+- `version-select`: Shows a popup on launch that allows the version in which the region files were generated to be selected. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior.
+- `modernize-ids`: If analyzing regions saved before 1.13, numeric block IDs will be replaced with their modern string representations. If no string corresponding to the numeric ID is found, the numeric ID will be saved instead.
 
 ## Version compatibility
 
 MCResourceAnalyzer 1.0.1 can analyze worlds generated with the following versions of Minecraft (Java Edition):
 
-- 1.17
-- 1.16
+- 1.16 to 1.17
+- Beta 1.3 to 1.1
 
 Support for more versions will be added in a future release.

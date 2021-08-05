@@ -35,7 +35,7 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
             String name = Main.formatRegionName(f);
             RegionFile r = new RegionFile(f);
             System.out.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
-                    + Main.date.format(new Date(r.lastModified())) + ")... ");
+                    + Main.DATE_FORMAT.format(new Date(r.lastModified())) + ")... ");
             for(int x = 0; x < 32; x++) {
                 for(int z = 0; z < 32; z++) {
                     if(r.hasChunk(x, z)) {
@@ -99,11 +99,11 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
                 }
             }
             data += blockCounter.get(key) + ","
-                    + Main.decimalFormat.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d);
+                    + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d);
             if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
                 data += ",N/A";
             } else {
-                data += "," + Main.decimalFormat.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d);
+                data += "," + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d);
             }
             data += "\n";
         }
