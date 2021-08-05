@@ -67,27 +67,21 @@ public abstract class RegionAnalyzer {
     }
 
     public enum Version {
-        ANVIL_2021("Anvil (1.16 to 1.17)", false, RegionAnalyzerAnvil2021.class), MCREGION("McRegion (Beta 1.3 to 1.1)",
-                false,
-                RegionAnalyzerMCRegion.class), ALPHA("Alpha (Infdev to Beta 1.2)", true, RegionAnalyzerAlpha.class);
+        ANVIL_2021("Anvil (1.16 to 1.17)", RegionAnalyzerAnvil2021.class), MCREGION("McRegion (Beta 1.3 to 1.1)",
+                RegionAnalyzerMCRegion.class), ALPHA("Alpha (Infdev 20100327 to Beta 1.2)",
+                        RegionAnalyzerAlpha.class), INDEV("Indev (Indev 0.31 20100122 to Infdev 20100325)",
+                                RegionAnalyzerIndev.class);
 
         private final String versionName;
-        private final boolean alphaDirectoryStructure;
         private final Class<? extends RegionAnalyzer> analyzerClass;
 
-        private Version(String versionName, boolean alphaDirectoryStructure,
-                Class<? extends RegionAnalyzer> analyzerClass) {
+        private Version(String versionName, Class<? extends RegionAnalyzer> analyzerClass) {
             this.versionName = versionName;
-            this.alphaDirectoryStructure = alphaDirectoryStructure;
             this.analyzerClass = analyzerClass;
         }
 
         public String toString() {
             return versionName;
-        }
-
-        public boolean useAlphaDirectoryStructure() {
-            return alphaDirectoryStructure;
         }
 
         public RegionAnalyzer getAnalyzerInstance() throws InstantiationException, IllegalAccessException {
