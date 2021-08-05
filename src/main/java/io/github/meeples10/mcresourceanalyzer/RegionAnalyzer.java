@@ -88,6 +88,30 @@ public abstract class RegionAnalyzer {
         }
     }
 
+    int getMinimumY() {
+        int min = Integer.MAX_VALUE;
+        for(HashMap<Integer, Long> map : heightCounter.values()) {
+            for(int i : map.keySet()) {
+                if(i < min) {
+                    min = i;
+                }
+            }
+        }
+        return min;
+    }
+
+    int getMaximumY() {
+        int max = Integer.MIN_VALUE;
+        for(HashMap<Integer, Long> map : heightCounter.values()) {
+            for(int i : map.keySet()) {
+                if(i > max) {
+                    max = i;
+                }
+            }
+        }
+        return max;
+    }
+
     public enum Version {
         ANVIL_2021("Anvil (1.16 to 1.17)", RegionAnalyzerAnvil2021.class), ANVIL_2018("Anvil (1.13 to 1.15)",
                 RegionAnalyzerAnvil2018.class), ANVIL_2012("Anvil (1.2 to 1.12)",
