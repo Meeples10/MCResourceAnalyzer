@@ -178,6 +178,6 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
                 }
             }
         }
-        airHack(i);
+        airHack(i, "minecraft:air");
     }
 }

@@ -185,6 +185,6 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
                 }
             }
         }
-        airHack(i);
+        airHack(i, "0");
     }
 }
