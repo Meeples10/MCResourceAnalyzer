@@ -52,7 +52,7 @@ public class Main {
         RegionAnalyzer analyzer;
         if(versionSelect) {
             Object selectedVersion = JOptionPane.showInputDialog(null,
-                    "Select the format in which the region files were saved", "Select Version",
+                    "Select the format in which the region files were saved:", "Select Version",
                     JOptionPane.PLAIN_MESSAGE, null, RegionAnalyzer.Version.values(),
                     RegionAnalyzer.Version.ANVIL_2021);
             if(!(selectedVersion instanceof RegionAnalyzer.Version)) System.exit(0);
