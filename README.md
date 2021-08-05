@@ -16,7 +16,7 @@ Note that the numbers for `minecraft:air` may be inaccurate at high Y values due
 
 ### Command line arguments
 
-Several command line arguments may be used to modify the behavior of the program. Multiple arguments can be used at once (e.g. `java -jar mc-resource-analyzer-x.x.x.jar table air-hack`). All available arguments are listed below.
+Several command line arguments may be used to modify the behavior of the program. Multiple arguments can be used at once (e.g. `java -jar mc-resource-analyzer-x.x.x.jar version-select modernize-ids`). All available arguments are listed below.
 
 - `statistics`: Adds a line with statistics at the beginning of the `data.csv` file.
 - `no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
