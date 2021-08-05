@@ -135,11 +135,11 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
         }
         NBTTagList sections = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
                 .getTagList("Sections", 10);
-        analyzeChunk(x, z, sections);
+        analyzeChunk(sections);
         chunkCount++;
     }
 
-    private void analyzeChunk(int chunkX, int chunkZ, NBTTagList sections) {
+    private void analyzeChunk(NBTTagList sections) {
         int i = 0;
         for(; i < sections.tagCount(); i++) {
             NBTTagCompound tag = sections.getCompoundTagAt(i);

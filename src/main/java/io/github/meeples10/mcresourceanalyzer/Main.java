@@ -56,15 +56,10 @@ public class Main {
                     JOptionPane.PLAIN_MESSAGE, null, RegionAnalyzer.Version.values(),
                     RegionAnalyzer.Version.ANVIL_2021);
             if(!(selectedVersion instanceof RegionAnalyzer.Version)) System.exit(0);
-            switch((RegionAnalyzer.Version) selectedVersion) {
-            case ANVIL_2021:
-                analyzer = new RegionAnalyzerAnvil2021();
-                break;
-            case MCREGION:
-                analyzer = new RegionAnalyzerMCRegion();
-                break;
-            default:
-                System.err.println("Unknown version: " + selectedVersion);
+            try {
+                analyzer = ((RegionAnalyzer.Version) selectedVersion).getAnalyzerInstance();
+            } catch(InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
                 System.exit(1);
                 return;
             }
