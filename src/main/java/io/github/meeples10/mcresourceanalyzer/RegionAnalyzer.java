@@ -1,10 +1,17 @@
 package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class RegionAnalyzer {
+    private static final List<Integer> BLOCKS_TO_MERGE = Arrays.asList(8, 9, 10, 11, 23, 26, 29, 33, 36, 39, 40, 46, 50,
+            51, 53, 54, 55, 59, 60, 61, 62, 63, 64, 65, 66, 68, 69, 70, 71, 72, 75, 76, 77, 78, 81, 83, 84, 86, 90, 91,
+            93, 94, 96, 104, 105, 106, 107, 115, 117, 118, 120, 127, 131, 132, 134, 135, 136, 139, 140, 141, 142, 143,
+            144, 146, 147, 148, 149, 150, 151, 154, 158, 163, 164, 167, 176, 177, 183, 184, 185, 186, 187, 178, 193,
+            194, 195, 196, 197, 198, 200, 207, 212, 218, 255);
     public long chunkCount = 0;
     public Map<String, Long> blockCounter = new HashMap<String, Long>();
     public Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
@@ -38,12 +45,12 @@ public abstract class RegionAnalyzer {
                 }
             }
             data += "<td>" + blockCounter.get(key) + "</td><td>"
-                    + Main.decimalFormat.format(((double) blockCounter.get(key) / totalBlocks) * 100.0d) + "</td>";
+                    + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalBlocks) * 100.0d) + "</td>";
             if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
                 data += "<td>N/A</td>";
             } else {
                 data += "<td>"
-                        + Main.decimalFormat.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d)
+                        + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d)
                         + "</td>";
             }
             data += "</tr>\n<tr>";
@@ -53,6 +60,10 @@ public abstract class RegionAnalyzer {
 
     public long getStartTime() {
         return firstStartTime;
+    }
+
+    boolean mergeStates(byte id) {
+        return BLOCKS_TO_MERGE.contains((int) id);
     }
 
     public enum Version {
