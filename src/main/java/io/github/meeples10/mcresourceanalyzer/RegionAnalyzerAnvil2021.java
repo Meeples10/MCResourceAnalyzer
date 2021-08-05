@@ -80,7 +80,9 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
                     + "\n";
         }
         data += "id,";
-        for(int i = 0; i < 256; i++) {
+        int minY = getMinimumY();
+        int maxY = getMaximumY();
+        for(int i = minY; i <= maxY; i++) {
             data += i + ",";
         }
         data += "total,percent_of_total,percent_excluding_air\n";
@@ -91,7 +93,7 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
             keyIndex += 1;
             System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data += key + ",";
-            for(int i = 0; i < 256; i++) {
+            for(int i = minY; i <= maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
                     data += "0,";
                 } else {
