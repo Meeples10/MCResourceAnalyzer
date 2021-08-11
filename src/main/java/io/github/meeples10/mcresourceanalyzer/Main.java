@@ -2,8 +2,10 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -20,6 +22,7 @@ public class Main {
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.##########");
     public static final Map<String, String> BLOCK_NAMES = new HashMap<>();
+    public static final List<Integer> BLOCKS_TO_MERGE = new ArrayList<>();
     static boolean saveStatistics = false;
     static boolean allowHack = true;
     static boolean generateTable = false;
@@ -53,21 +56,42 @@ public class Main {
                     System.err.print("\n");
                     System.exit(1);
                 }
+            } else if(arg.toLowerCase().startsWith("blocks=")) {
+                try {
+                    for(String line : readLines(new FileInputStream(new File(arg.split("=", 2)[1])))) {
+                        if(line.length() == 0) continue;
+                        String[] split = line.split("=", 2);
+                        BLOCK_NAMES.put(split[0], split[1]);
+                    }
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
+            } else if(arg.toLowerCase().startsWith("merge=")) {
+                try {
+                    for(String line : readLines(new FileInputStream(new File(arg.split("=", 2)[1])))) {
+                        if(line.length() == 0) continue;
+                        BLOCKS_TO_MERGE.add(Integer.valueOf(line.trim()));
+                    }
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
             } else if(arg.equalsIgnoreCase("modernize-ids")) {
                 modernizeIDs = true;
             } else {
                 System.err.println("Unknown argument: " + arg);
             }
         }
-        System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
-                + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
-                + (versionSelectedExplicitly ? selectedVersion : versionSelect) + "\nModernize block IDs: "
-                + modernizeIDs + "\n--------------------------------");
         try {
             loadBlockNames();
+            loadBlocksToMerge();
         } catch(IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
+                + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
+                + (versionSelectedExplicitly ? selectedVersion : versionSelect) + "\nModernize block IDs: "
+                + modernizeIDs + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: "
+                + BLOCKS_TO_MERGE.size() + "\n--------------------------------");
         RegionAnalyzer analyzer;
         if(versionSelect) {
             Object returnedVersion = JOptionPane.showInputDialog(null,
@@ -156,17 +180,32 @@ public class Main {
     }
 
     private static void loadBlockNames() throws IOException {
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(Main.class.getResourceAsStream("/blocks.properties")));
-        String line;
-        while((line = reader.readLine()) != null) {
+        for(String line : readLines(Main.class.getResourceAsStream("/blocks.properties"))) {
             if(line.length() == 0) continue;
             String[] split = line.split("=", 2);
             BLOCK_NAMES.put(split[0], split[1]);
         }
     }
 
+    private static void loadBlocksToMerge() throws IOException {
+        for(String line : readLines(Main.class.getResourceAsStream("/merge.properties"))) {
+            if(line.length() == 0) continue;
+            BLOCKS_TO_MERGE.add(Integer.valueOf(line.trim()));
+        }
+    }
+
     public static String getStringID(String id) {
         return BLOCK_NAMES.getOrDefault(id, id);
+    }
+
+    public static List<String> readLines(InputStream stream) throws IOException {
+        List<String> lines = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String line;
+        while((line = reader.readLine()) != null) {
+            lines.add(line);
+        }
+        reader.close();
+        return lines;
     }
 }
