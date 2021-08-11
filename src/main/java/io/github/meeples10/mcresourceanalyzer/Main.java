@@ -24,10 +24,12 @@ public class Main {
     static boolean allowHack = true;
     static boolean generateTable = false;
     static boolean versionSelect = false;
+    static boolean versionSelectedExplicitly = false;
     static boolean modernizeIDs = false;
 
     public static void main(String[] args) {
         DECIMAL_FORMAT.setMaximumFractionDigits(10);
+        RegionAnalyzer.Version selectedVersion = RegionAnalyzer.Version.values()[0];
         for(String arg : args) {
             if(arg.equalsIgnoreCase("statistics")) {
                 saveStatistics = true;
@@ -37,6 +39,20 @@ public class Main {
                 generateTable = true;
             } else if(arg.equalsIgnoreCase("version-select")) {
                 versionSelect = true;
+            } else if(arg.toLowerCase().startsWith("version-select=")) {
+                versionSelectedExplicitly = true;
+                String v = arg.split("=", 2)[1].toUpperCase();
+                try {
+                    selectedVersion = RegionAnalyzer.Version.valueOf(v);
+                } catch(IllegalArgumentException e) {
+                    System.err.println("Invalid version: " + v);
+                    System.err.print("Version must be one of the following: ");
+                    for(RegionAnalyzer.Version version : RegionAnalyzer.Version.values()) {
+                        System.err.print(version.name() + " ");
+                    }
+                    System.err.print("\n");
+                    System.exit(1);
+                }
             } else if(arg.equalsIgnoreCase("modernize-ids")) {
                 modernizeIDs = true;
             } else {
@@ -44,8 +60,9 @@ public class Main {
             }
         }
         System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
-                + "\nGenerate HTML table: " + generateTable + "\nVersion select: " + versionSelect
-                + "\nModernize block IDs: " + modernizeIDs + "\n--------------------------------");
+                + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
+                + (versionSelectedExplicitly ? selectedVersion : versionSelect) + "\nModernize block IDs: "
+                + modernizeIDs + "\n--------------------------------");
         try {
             loadBlockNames();
         } catch(IOException e) {
@@ -53,21 +70,21 @@ public class Main {
         }
         RegionAnalyzer analyzer;
         if(versionSelect) {
-            Object selectedVersion = JOptionPane.showInputDialog(null,
+            Object returnedVersion = JOptionPane.showInputDialog(null,
                     "Select the format in which the region files were saved:", "Select Version",
                     JOptionPane.PLAIN_MESSAGE, null, RegionAnalyzer.Version.values(),
                     RegionAnalyzer.Version.ANVIL_2021);
-            if(!(selectedVersion instanceof RegionAnalyzer.Version)) System.exit(0);
-            try {
-                analyzer = ((RegionAnalyzer.Version) selectedVersion).getAnalyzerInstance();
-            } catch(InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-                System.exit(1);
-                return;
-            }
-        } else {
-            analyzer = new RegionAnalyzerAnvil2021();
+            if(!(returnedVersion instanceof RegionAnalyzer.Version)) System.exit(0);
+            selectedVersion = (RegionAnalyzer.Version) returnedVersion;
         }
+        try {
+            analyzer = selectedVersion.getAnalyzerInstance();
+        } catch(InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return;
+        }
+        if(analyzer == null) analyzer = new RegionAnalyzerAnvil2021();
         analyzer.analyze(new File("region"));
         System.out.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
     }

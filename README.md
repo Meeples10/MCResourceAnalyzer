@@ -22,6 +22,13 @@ Several command line arguments may be used to modify the behavior of the program
 - `no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
 - `table`: Generates a simple HTML table with the collected data.
 - `version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Shows a popup on launch that allows the version in which the region files were generated to be selected. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior.
+Alternatively, to explicitly specify a version from the command line and skip the popup, use the argument `version-select=VERSION` where `VERSION` is one of the following:
+  - `ANVIL_2021` for 1.16 to 1.17
+  - `ANVIL_2018` for 1.13 to 1.15
+  - `ANVIL_2012` for 1.2 to 1.12
+  - `MCREGION` for Beta 1.3 to 1.1
+  - `ALPHA` for Infdev 20100327 to Beta 1.2
+  - `INDEV` for Indev 0.31 20100122 to Infdev 20100325
 - `modernize-ids`: If analyzing regions saved before 1.13, numeric block IDs will be replaced with their modern string representations. If no string corresponding to the numeric ID is found, the numeric ID will be saved instead.
 
 ### Version compatibility
