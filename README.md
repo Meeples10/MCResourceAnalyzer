@@ -30,7 +30,7 @@ Alternatively, to explicitly specify a version from the command line and skip th
   - `ALPHA` for Infdev 20100327 to Beta 1.2
   - `INDEV` for Indev 0.31 20100122 to Infdev 20100325
 - `modernize-ids`: If analyzing regions saved before 1.13, numeric block IDs will be replaced with their modern string representations. If no string corresponding to the numeric ID is found, the numeric ID will be saved instead.
-- `blocks=<path>`: When using the `modernize-ids` arguments on a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [blocks.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/blocks.properties).
+- `blocks=<path>`: When using the `modernize-ids` argument on a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [blocks.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/blocks.properties).
 - `merge=<path>`: When analyzing a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [merge.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/merge.properties). Any block with an ID listed in this file will have all of its variants merged into a single value.
 
 ### Version compatibility
