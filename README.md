@@ -39,6 +39,10 @@ MCResourceAnalyzer 1.1.1 can analyze worlds generated with any version of Minecr
 
 Note that Indev worlds with the `Long` and `Deep` world shapes are not supported.
 
+## Contributing
+
+Contributions to this project are more than welcome. If you create your own fork, my only request is that you include the following URL somewhere in your fork: https://github.com/Meeples10/MCResourceAnalyzer
+If you notice that the program fails to analyze a particular world, please [create an issue](https://github.com/Meeples10/MCResourceAnalyzer/issues/new?title=Error%20when%20analyzing%20world&body=Minecraft%20version:%20%0A%0AProgram%20output:%0A%60%60%60%0A[paste%20output%20here]%0A%60%60%60%0A%0AOther%20details:%20%0A%0A%3C%21--%20If%20possible,%20please%20attach%20the%20region%20file%20that%20caused%20the%20program%20to%20fail%20--%3E) with the version of Minecraft with which the world was generated, the output of the program including any stack traces it may have produced, and, if possible, the region file that caused the program to fail.
 
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/donate?business=ZXKMCY4HP34BG&no_recurring=0&item_name=Developing+Software&currency_code=USD)
