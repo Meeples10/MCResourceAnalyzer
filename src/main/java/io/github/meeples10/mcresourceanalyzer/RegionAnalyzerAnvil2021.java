@@ -32,7 +32,7 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
         int rnum = 1;
         for(File f : regionDir.listFiles()) {
             long startTime = System.currentTimeMillis();
-            String name = Main.formatRegionName(f);
+            String name = Main.formatRegionName(regionDir, f);
             RegionFile r = new RegionFile(f);
             System.out.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
                     + Main.DATE_FORMAT.format(new Date(r.lastModified())) + ")... ");

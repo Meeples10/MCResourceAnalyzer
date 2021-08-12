@@ -15,12 +15,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class RegionAnalyzerIndev extends RegionAnalyzer {
 
     @Override
-    public void analyze(File ignore) {
-        File world = new File("world.mclevel");
-        if(!world.exists()) {
-            System.out.println("Error: No world file found at " + world.getAbsolutePath());
-            System.exit(1);
-        }
+    public void analyze(File world) {
         try {
             processWorld(world);
         } catch(Exception e) {
