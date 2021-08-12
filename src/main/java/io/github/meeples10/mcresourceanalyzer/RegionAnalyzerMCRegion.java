@@ -17,10 +17,6 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
 
     @Override
     public void analyze(File regionDir) {
-        if(!regionDir.exists()) {
-            System.out.println("Error: No region directory found at " + regionDir.getAbsolutePath());
-            System.exit(1);
-        }
         int totalRegions = regionDir.listFiles().length;
         if(totalRegions == 0) {
             System.out.println("Error: Region directory is empty");
@@ -30,7 +26,7 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
         int rnum = 1;
         for(File f : regionDir.listFiles()) {
             long startTime = System.currentTimeMillis();
-            String name = Main.formatRegionName(f);
+            String name = Main.formatRegionName(regionDir, f);
             RegionFile r = new RegionFile(f);
             System.out.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
                     + Main.DATE_FORMAT.format(new Date(r.lastModified())) + ")... ");

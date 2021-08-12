@@ -27,12 +27,14 @@ public class Main {
     static boolean allowHack = true;
     static boolean generateTable = false;
     static boolean versionSelect = false;
-    static boolean versionSelectedExplicitly = false;
+    static boolean versionOverride = false;
     static boolean modernizeIDs = false;
+    static boolean inputOverride = false;
 
     public static void main(String[] args) {
         DECIMAL_FORMAT.setMaximumFractionDigits(10);
         RegionAnalyzer.Version selectedVersion = RegionAnalyzer.Version.values()[0];
+        File inputFile = new File("region");
         for(String arg : args) {
             if(arg.equalsIgnoreCase("statistics")) {
                 saveStatistics = true;
@@ -43,7 +45,7 @@ public class Main {
             } else if(arg.equalsIgnoreCase("version-select")) {
                 versionSelect = true;
             } else if(arg.toLowerCase().startsWith("version-select=")) {
-                versionSelectedExplicitly = true;
+                versionOverride = true;
                 String v = arg.split("=", 2)[1].toUpperCase();
                 try {
                     selectedVersion = RegionAnalyzer.Version.valueOf(v);
@@ -77,6 +79,9 @@ public class Main {
                 }
             } else if(arg.equalsIgnoreCase("modernize-ids")) {
                 modernizeIDs = true;
+            } else if(arg.toLowerCase().startsWith("input=")) {
+                inputOverride = true;
+                inputFile = new File(arg.split("=", 2)[1]);
             } else {
                 System.err.println("Unknown argument: " + arg);
             }
@@ -89,9 +94,9 @@ public class Main {
         }
         System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
                 + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
-                + (versionSelectedExplicitly ? selectedVersion : versionSelect) + "\nModernize block IDs: "
-                + modernizeIDs + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: "
-                + BLOCKS_TO_MERGE.size() + "\n--------------------------------");
+                + (versionOverride ? selectedVersion : versionSelect) + "\nModernize block IDs: " + modernizeIDs
+                + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
+                + inputFile.getPath() + "\n--------------------------------");
         RegionAnalyzer analyzer;
         if(versionSelect) {
             Object returnedVersion = JOptionPane.showInputDialog(null,
@@ -109,12 +114,19 @@ public class Main {
             return;
         }
         if(analyzer == null) analyzer = new RegionAnalyzerAnvil2021();
-        analyzer.analyze(new File("region"));
+        if(inputOverride) {
+            if(inputFile.isDirectory() != selectedVersion.usesDirectory()) {
+                System.err.println("Input must be a " + (selectedVersion.usesDirectory() ? "directory" : "file") + ": "
+                        + inputFile.getAbsolutePath());
+                System.exit(1);
+            }
+        }
+        analyzer.analyze(inputFile);
         System.out.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
     }
 
-    public static String formatRegionName(File f) {
-        return f.getPath().split("region")[1].substring(1);
+    public static String formatRegionName(File parent, File f) {
+        return f.getPath().split(parent.getName())[1].substring(1);
     }
 
     /**

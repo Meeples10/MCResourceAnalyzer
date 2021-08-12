@@ -18,11 +18,6 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
 
     @Override
     public void analyze(File world) {
-        if(!world.exists()) {
-            System.out.println("Error: No world directory found at " + world.getAbsolutePath());
-            System.exit(1);
-        }
-
         List<File> chunkFiles = new ArrayList<>();
         for(File f : world.listFiles()) {
             if(!f.isDirectory()) continue;
