@@ -30,6 +30,7 @@ public class Main {
     static boolean versionOverride = false;
     static boolean modernizeIDs = false;
     static boolean inputOverride = false;
+    static String outputPrefix = "";
 
     public static void main(String[] args) {
         DECIMAL_FORMAT.setMaximumFractionDigits(10);
@@ -82,6 +83,8 @@ public class Main {
             } else if(arg.toLowerCase().startsWith("input=")) {
                 inputOverride = true;
                 inputFile = new File(arg.split("=", 2)[1]);
+            } else if(arg.toLowerCase().startsWith("output-prefix=")) {
+                outputPrefix = arg.split("=", 2)[1].trim();
             } else {
                 System.err.println("Unknown argument: " + arg);
             }
@@ -96,7 +99,8 @@ public class Main {
                 + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
                 + (versionOverride ? selectedVersion : versionSelect) + "\nModernize block IDs: " + modernizeIDs
                 + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
-                + inputFile.getPath() + "\n--------------------------------");
+                + inputFile.getPath() + "\nOutput prefix: " + (outputPrefix.equals("") ? "(default)" : outputPrefix)
+                + "\n--------------------------------");
         RegionAnalyzer analyzer;
         if(versionSelect) {
             Object returnedVersion = JOptionPane.showInputDialog(null,
@@ -208,6 +212,10 @@ public class Main {
 
     public static String getStringID(String id) {
         return BLOCK_NAMES.getOrDefault(id, id);
+    }
+
+    public static String getOutputPrefix() {
+        return outputPrefix.equals("") ? "data" : outputPrefix;
     }
 
     public static List<String> readLines(InputStream stream) throws IOException {
