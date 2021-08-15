@@ -33,6 +33,7 @@ Alternatively, to explicitly specify a version from the command line and skip th
 - `blocks=<path>`: When using the `modernize-ids` argument on a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [blocks.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/blocks.properties).
 - `merge=<path>`: When analyzing a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [merge.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/merge.properties). Any block with an ID listed in this file will have all of its variants merged into a single value.
 - `input=<path>`: Use this argument to specify an input region directory or .mclevel file other than the default. Note that `<path>` is relative to the program's working directory.
+- `output-prefix=<prefix>`: Use this argument to add a prefix to the program's output files. For example, using `output-prefix=abc` would result in the files `abc.csv` and `abc_table.html`.
 
 ### Version compatibility
 
