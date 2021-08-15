@@ -105,7 +105,7 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
             data += "\n";
         }
         try {
-            File out = new File("data.csv");
+            File out = new File(Main.getOutputPrefix() + ".csv");
             Main.writeStringToFile(out, data);
             System.out.println("\nData written to " + out.getAbsolutePath());
         } catch(IOException e) {
@@ -114,7 +114,7 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
         }
         if(Main.generateTable) {
             try {
-                File out = new File("table.html");
+                File out = new File(Main.getOutputPrefix() + "_table.html");
                 Main.writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
                 System.out.println("\nTable written to " + out.getAbsolutePath());
             } catch(IOException e) {
