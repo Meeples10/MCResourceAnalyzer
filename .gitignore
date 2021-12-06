@@ -11,8 +11,8 @@ hs_err_pid*
 .classpath
 .project
 .settings/
-data.csv
-table.html
+*.csv
+*.html
 target/
 region/
 region*/
