@@ -17,9 +17,11 @@ public abstract class RegionAnalyzer {
     public abstract void analyze(File regionDir);
 
     public String generateTable(double totalBlocks, double totalExcludingAir) {
+        int minY = getMinimumY();
+        int maxY = getMaximumY();
         String data = "<table>\n";
         data += "<tr><th>id</th><th>";
-        for(int i = 0; i < 256; i++) {
+        for(int i = minY; i < maxY; i++) {
             data += i + "</th><th>";
         }
         data += "total</th><th>percent_of_total</th><th>percent_excluding_air</th></tr>\n<tr>";
@@ -30,7 +32,7 @@ public abstract class RegionAnalyzer {
             keyIndex += 1;
             System.out.print("\rGenerating table... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data += "<td>" + key + "</td>";
-            for(int i = 0; i < 256; i++) {
+            for(int i = minY; i < maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
                     data += "<td>0</td>";
                 } else {
