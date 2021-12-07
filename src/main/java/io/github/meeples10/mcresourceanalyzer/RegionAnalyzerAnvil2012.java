@@ -70,13 +70,7 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
 
         double totalExcludingAir = (double) (totalBlocks - (blockCounter.containsKey("0") ? blockCounter.get("0") : 0));
         System.out.print("Generating CSV... ");
-        String data = "";
-        if(Main.saveStatistics) {
-            data += "chunk-count=" + chunkCount + ",unique-blocks=" + blockCounter.size() + ",total-blocks="
-                    + totalBlocks + ",duration-millis=" + duration + ",duration-readable=" + Main.millisToHMS(duration)
-                    + "\n";
-        }
-        data += "id,";
+        String data = "id,";
         for(int i = 0; i < 256; i++) {
             data += i + ",";
         }
@@ -120,6 +114,16 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
             } catch(IOException e) {
                 e.printStackTrace();
                 System.exit(1);
+            }
+        }
+        if(Main.saveStatistics) {
+            try {
+                Main.writeStringToFile(new File(Main.getOutputPrefix() + "_stats.txt"),
+                        "chunk-count=" + chunkCount + "\nunique-blocks=" + blockCounter.size() + "\ntotal-blocks="
+                                + totalBlocks + "\nduration-millis=" + duration + "\nduration-readable="
+                                + Main.millisToHMS(duration));
+            } catch(IOException e) {
+                e.printStackTrace();
             }
         }
     }
