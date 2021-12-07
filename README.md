@@ -18,7 +18,6 @@ Note that the numbers for `minecraft:air` may be inaccurate at high Y values due
 
 Several command line arguments may be used to modify the behavior of the program. Multiple arguments can be used at once (e.g. `java -jar mc-resource-analyzer-x.x.x.jar version-select modernize-ids`). All available arguments are listed below.
 
-- `statistics`: Adds a line with statistics at the beginning of the `data.csv` file.
 - `no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
 - `table`: Generates a simple HTML table with the collected data.
 - `version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Shows a popup on launch that allows the version in which the region files were generated to be selected. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior.
@@ -35,6 +34,7 @@ Alternatively, to explicitly specify a version from the command line and skip th
 - `merge=<path>`: When analyzing a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [merge.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/merge.properties). Any block with an ID listed in this file will have all of its variants merged into a single value.
 - `input=<path>`: Use this argument to specify an input region directory or .mclevel file other than the default. Note that `<path>` is relative to the program's working directory.
 - `output-prefix=<prefix>`: Use this argument to add a prefix to the program's output files. For example, using `output-prefix=abc` would result in the files `abc.csv` and `abc_table.html`.
+- `statistics`: Outputs a file with statistics about the analysis.
 
 ### Version compatibility
 
