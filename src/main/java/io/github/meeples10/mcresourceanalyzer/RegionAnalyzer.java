@@ -31,7 +31,7 @@ public abstract class RegionAnalyzer {
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
             System.out.print("\rGenerating table... " + String.format(completionFormat, keyIndex, blockCounter.size()));
-            data += "<td>" + key + "</td>";
+            data += "<td>" + (Main.modernizeIDs ? Main.getStringID(key) : key) + "</td>";
             for(int i = minY; i < maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
                     data += "<td>0</td>";
