@@ -40,9 +40,8 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
                     "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
             cnum++;
         }
-        endTime = System.currentTimeMillis();
-        System.out.println(("Completed analysis in " + Main.millisToHMS(endTime - getStartTime()) + " (" + chunkCount
-                + " chunks)"));
+        duration = System.currentTimeMillis() - getStartTime();
+        System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
     }
 
     private void processChunk(File chunkFile) throws Exception {
