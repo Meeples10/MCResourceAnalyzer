@@ -96,6 +96,16 @@ public abstract class RegionAnalyzer {
                 System.exit(1);
             }
         }
+        if(Main.saveStatistics) {
+            try {
+                Main.writeStringToFile(new File(Main.getOutputPrefix() + "_stats.txt"),
+                        "chunk-count=" + chunkCount + "\nunique-blocks=" + blockCounter.size() + "\ntotal-blocks="
+                                + totalBlocks + "\nduration-millis=" + (endTime - getStartTime())
+                                + "\nduration-readable=" + Main.millisToHMS(endTime - getStartTime()));
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public abstract void analyze(File input);
