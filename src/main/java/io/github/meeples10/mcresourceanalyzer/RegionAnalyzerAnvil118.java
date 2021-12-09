@@ -2,12 +2,8 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -52,21 +48,6 @@ public class RegionAnalyzerAnvil118 extends RegionAnalyzer {
         }
         long duration = System.currentTimeMillis() - getStartTime();
         System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
-        long totalBlocks = 0L;
-        for(String key : blockCounter.keySet()) {
-            totalBlocks += blockCounter.get(key);
-        }
-        System.out.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
-                + " blocks total\n--------------------------------");
-
-        System.out.print("Sorting data... ");
-        heightCounter = heightCounter.entrySet().stream().sorted(Map.Entry.comparingByKey(new Comparator<String>() {
-            @Override
-            public int compare(String arg0, String arg1) {
-                return Long.compare(blockCounter.get(arg1), blockCounter.get(arg0));
-            }
-        })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-        System.out.println("Done");
     }
 
     private void processRegion(RegionFile r, String name, int x, int z) throws Exception {

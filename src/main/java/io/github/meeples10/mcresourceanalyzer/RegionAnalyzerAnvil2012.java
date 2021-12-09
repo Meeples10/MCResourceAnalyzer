@@ -47,12 +47,6 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
         }
         long duration = System.currentTimeMillis() - getStartTime();
         System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
-        long totalBlocks = 0L;
-        for(String key : blockCounter.keySet()) {
-            totalBlocks += blockCounter.get(key);
-        }
-        System.out.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
-                + " blocks total\n--------------------------------");
     }
 
     private void processRegion(RegionFile r, String name, int x, int z) throws Exception {
