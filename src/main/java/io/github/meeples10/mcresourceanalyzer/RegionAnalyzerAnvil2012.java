@@ -45,7 +45,7 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
                     "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
             rnum++;
         }
-        long duration = System.currentTimeMillis() - getStartTime();
+        duration = System.currentTimeMillis() - getStartTime();
         System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
     }
 

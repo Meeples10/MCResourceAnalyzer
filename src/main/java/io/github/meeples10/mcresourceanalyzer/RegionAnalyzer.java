@@ -14,7 +14,7 @@ public abstract class RegionAnalyzer {
     public Map<String, Long> blockCounter = new HashMap<String, Long>();
     public Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
     private long firstStartTime;
-    public long endTime;
+    public long duration;
 
     public RegionAnalyzer() {
         firstStartTime = System.currentTimeMillis();
@@ -100,8 +100,8 @@ public abstract class RegionAnalyzer {
             try {
                 Main.writeStringToFile(new File(Main.getOutputPrefix() + "_stats.txt"),
                         "chunk-count=" + chunkCount + "\nunique-blocks=" + blockCounter.size() + "\ntotal-blocks="
-                                + totalBlocks + "\nduration-millis=" + (endTime - getStartTime())
-                                + "\nduration-readable=" + Main.millisToHMS(endTime - getStartTime()));
+                                + totalBlocks + "\nduration-millis=" + (duration) + "\nduration-readable="
+                                + Main.millisToHMS(duration));
             } catch(IOException e) {
                 e.printStackTrace();
             }
