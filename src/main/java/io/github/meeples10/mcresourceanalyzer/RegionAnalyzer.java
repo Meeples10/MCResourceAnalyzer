@@ -1,20 +1,104 @@
 package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class RegionAnalyzer {
+    private Version version;
     public long chunkCount = 0;
     public Map<String, Long> blockCounter = new HashMap<String, Long>();
     public Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
     private long firstStartTime;
+    public long endTime;
 
     public RegionAnalyzer() {
         firstStartTime = System.currentTimeMillis();
     }
 
-    public abstract void analyze(File regionDir);
+    public void setVersion(Version version) {
+        this.version = version;
+    }
+
+    public void run(File input) {
+        analyze(input);
+
+        long totalBlocks = 0L;
+        for(String key : blockCounter.keySet()) {
+            totalBlocks += blockCounter.get(key);
+        }
+        System.out.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
+                + " blocks total\n--------------------------------");
+
+        System.out.print("Sorting data... ");
+        heightCounter = heightCounter.entrySet().stream().sorted(Map.Entry.comparingByKey(new Comparator<String>() {
+            @Override
+            public int compare(String arg0, String arg1) {
+                return Long.compare(blockCounter.get(arg1), blockCounter.get(arg0));
+            }
+        })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        System.out.println("Done");
+
+        double totalExcludingAir = (double) (totalBlocks - (blockCounter.containsKey("0") ? blockCounter.get("0") : 0)
+                - (blockCounter.containsKey("minecraft:air") ? blockCounter.get("minecraft:air") : 0)
+                - (blockCounter.containsKey("minecraft:cave_air") ? blockCounter.get("minecraft:cave_air") : 0));
+        System.out.print("Generating CSV... ");
+        String data = "id,";
+        int minY = getMinimumY();
+        int maxY = getMaximumY();
+        for(int i = minY; i <= maxY; i++) {
+            data += i + ",";
+        }
+        data += "total,percent_of_total,percent_excluding_air\n";
+        int digits = String.valueOf(blockCounter.size()).length();
+        String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
+        int keyIndex = 0;
+        for(String key : heightCounter.keySet()) {
+            keyIndex += 1;
+            System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
+            data += key + ",";
+            for(int i = minY; i <= maxY; i++) {
+                if(!heightCounter.get(key).containsKey(i)) {
+                    data += "0,";
+                } else {
+                    data += heightCounter.get(key).get(i) + ",";
+                }
+            }
+            data += blockCounter.get(key) + ","
+                    + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d);
+            if(key.equals("0") || key.equals("minecraft:air") || key.equals("minecraft:cave_air")
+                    || key.equals("minecraft:void_air")) {
+                data += ",N/A";
+            } else {
+                data += "," + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d);
+            }
+            data += "\n";
+        }
+        try {
+            File out = new File(Main.getOutputPrefix() + ".csv");
+            Main.writeStringToFile(out, data);
+            System.out.println("\nData written to " + out.getAbsolutePath());
+        } catch(IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        if(Main.generateTable) {
+            try {
+                File out = new File(Main.getOutputPrefix() + "_table.html");
+                Main.writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
+                System.out.println("\nTable written to " + out.getAbsolutePath());
+            } catch(IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+    }
+
+    public abstract void analyze(File input);
 
     public String generateTable(double totalBlocks, double totalExcludingAir) {
         int minY = getMinimumY();
@@ -92,7 +176,11 @@ public abstract class RegionAnalyzer {
                 }
             }
         }
-        return min;
+        if(version == Version.ANVIL_2021 || version == Version.ANVIL_118) {
+            return min < 0 ? min : 0;
+        } else {
+            return 0;
+        }
     }
 
     int getMaximumY() {
@@ -104,7 +192,11 @@ public abstract class RegionAnalyzer {
                 }
             }
         }
-        return max;
+        if(version == Version.INDEV || version == Version.ALPHA || version == Version.MCREGION) {
+            return 128;
+        } else {
+            return max > 255 ? max : 255;
+        }
     }
 
     public enum Version {
