@@ -18,12 +18,6 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
         }
         long duration = System.currentTimeMillis() - getStartTime();
         System.out.println(("Completed analysis in " + Main.millisToHMS(duration)));
-        long totalBlocks = 0L;
-        for(String key : blockCounter.keySet()) {
-            totalBlocks += blockCounter.get(key);
-        }
-        System.out.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
-                + " blocks total\n--------------------------------");
     }
 
     private void processWorld(File worldFile) throws Exception {
