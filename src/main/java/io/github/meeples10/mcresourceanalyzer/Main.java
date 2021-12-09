@@ -106,7 +106,7 @@ public class Main {
             Object returnedVersion = JOptionPane.showInputDialog(null,
                     "Select the format in which the region files were saved:", "Select Version",
                     JOptionPane.PLAIN_MESSAGE, null, RegionAnalyzer.Version.values(),
-                    RegionAnalyzer.Version.ANVIL_2021);
+                    RegionAnalyzer.Version.values()[0]);
             if(!(returnedVersion instanceof RegionAnalyzer.Version)) System.exit(0);
             selectedVersion = (RegionAnalyzer.Version) returnedVersion;
         }
@@ -117,7 +117,8 @@ public class Main {
             System.exit(1);
             return;
         }
-        if(analyzer == null) analyzer = new RegionAnalyzerAnvil2021();
+        if(analyzer == null) analyzer = new RegionAnalyzerAnvil118();
+        analyzer.setVersion(selectedVersion);
         if(inputOverride) {
             if(inputFile.isDirectory() != selectedVersion.usesDirectory()) {
                 System.err.println("Input must be a " + (selectedVersion.usesDirectory() ? "directory" : "file") + ": "
@@ -125,7 +126,7 @@ public class Main {
                 System.exit(1);
             }
         }
-        analyzer.analyze(inputFile);
+        analyzer.run(inputFile);
         System.out.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
     }
 

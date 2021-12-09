@@ -2,7 +2,6 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,69 +67,6 @@ public class RegionAnalyzerAnvil118 extends RegionAnalyzer {
             }
         })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         System.out.println("Done");
-
-        double totalExcludingAir = (double) (totalBlocks
-                - (blockCounter.containsKey("minecraft:air") ? blockCounter.get("minecraft:air") : 0)
-                - (blockCounter.containsKey("minecraft:cave_air") ? blockCounter.get("minecraft:cave_air") : 0));
-        System.out.print("Generating CSV... ");
-        String data = "id,";
-        int minY = getMinimumY();
-        int maxY = getMaximumY();
-        for(int i = minY; i <= maxY; i++) {
-            data += i + ",";
-        }
-        data += "total,percent_of_total,percent_excluding_air\n";
-        int digits = String.valueOf(blockCounter.size()).length();
-        String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
-        int keyIndex = 0;
-        for(String key : heightCounter.keySet()) {
-            keyIndex += 1;
-            System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
-            data += key + ",";
-            for(int i = minY; i <= maxY; i++) {
-                if(!heightCounter.get(key).containsKey(i)) {
-                    data += "0,";
-                } else {
-                    data += heightCounter.get(key).get(i) + ",";
-                }
-            }
-            data += blockCounter.get(key) + ","
-                    + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d);
-            if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
-                data += ",N/A";
-            } else {
-                data += "," + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d);
-            }
-            data += "\n";
-        }
-        try {
-            File out = new File(Main.getOutputPrefix() + ".csv");
-            Main.writeStringToFile(out, data);
-            System.out.println("\nData written to " + out.getAbsolutePath());
-        } catch(IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        if(Main.generateTable) {
-            try {
-                File out = new File(Main.getOutputPrefix() + "_table.html");
-                Main.writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
-                System.out.println("\nTable written to " + out.getAbsolutePath());
-            } catch(IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }
-        if(Main.saveStatistics) {
-            try {
-                Main.writeStringToFile(new File(Main.getOutputPrefix() + "_stats.txt"),
-                        "chunk-count=" + chunkCount + "\nunique-blocks=" + blockCounter.size() + "\ntotal-blocks="
-                                + totalBlocks + "\nduration-millis=" + duration + "\nduration-readable="
-                                + Main.millisToHMS(duration));
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void processRegion(RegionFile r, String name, int x, int z) throws Exception {

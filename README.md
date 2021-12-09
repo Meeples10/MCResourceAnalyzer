@@ -38,7 +38,7 @@ Alternatively, to explicitly specify a version from the command line and skip th
 
 ### Version compatibility
 
-MCResourceAnalyzer 1.1.4 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.18.
+MCResourceAnalyzer 1.1.5 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.18.
 
 Note that Indev worlds with the `Long` and `Deep` world shapes are not supported.
 
