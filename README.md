@@ -1,6 +1,6 @@
 # Minecraft Resource Analyzer
 
-For more information, see [this page](https://meeples10.github.io/resource-distribution.html).
+For more information, see [this page](https://meeples10.github.io/resource-distribution/index.html).
 
 This is a standalone program created to replace [this plugin](https://github.com/Meeples10/ChunkAnalyzer).
 
