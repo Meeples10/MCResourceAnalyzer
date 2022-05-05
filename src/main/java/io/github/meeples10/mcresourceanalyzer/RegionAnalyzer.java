@@ -31,22 +31,22 @@ public abstract class RegionAnalyzer {
         for(String key : blockCounter.keySet()) {
             totalBlocks += blockCounter.get(key);
         }
-        System.out.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
+        Main.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
                 + " blocks total\n--------------------------------");
 
-        System.out.print("Sorting data... ");
+        Main.print("Sorting data... ");
         heightCounter = heightCounter.entrySet().stream().sorted(Map.Entry.comparingByKey(new Comparator<String>() {
             @Override
             public int compare(String arg0, String arg1) {
                 return Long.compare(blockCounter.get(arg1), blockCounter.get(arg0));
             }
         })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-        System.out.println("Done");
+        Main.println("Done");
 
         double totalExcludingAir = (double) (totalBlocks - (blockCounter.containsKey("0") ? blockCounter.get("0") : 0)
                 - (blockCounter.containsKey("minecraft:air") ? blockCounter.get("minecraft:air") : 0)
                 - (blockCounter.containsKey("minecraft:cave_air") ? blockCounter.get("minecraft:cave_air") : 0));
-        System.out.print("Generating CSV... ");
+        Main.print("Generating CSV... ");
         StringBuilder data = new StringBuilder();
         data.append("id,");
         int minY = getMinimumY();
@@ -61,7 +61,7 @@ public abstract class RegionAnalyzer {
         int keyIndex = 0;
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
-            System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
+            Main.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data.append(Main.modernizeIDs ? Main.getStringID(key) : key);
             data.append(",");
             for(int i = minY; i <= maxY; i++) {
@@ -87,7 +87,7 @@ public abstract class RegionAnalyzer {
         try {
             File out = new File(Main.getOutputPrefix() + ".csv");
             Main.writeStringToFile(out, data.toString());
-            System.out.println("\nData written to " + out.getAbsolutePath());
+            Main.println("\nData written to " + out.getAbsolutePath());
         } catch(IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -96,7 +96,7 @@ public abstract class RegionAnalyzer {
             try {
                 File out = new File(Main.getOutputPrefix() + "_table.html");
                 Main.writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
-                System.out.println("\nTable written to " + out.getAbsolutePath());
+                Main.println("\nTable written to " + out.getAbsolutePath());
             } catch(IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -131,7 +131,7 @@ public abstract class RegionAnalyzer {
         int keyIndex = 0;
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
-            System.out.print("\rGenerating table... " + String.format(completionFormat, keyIndex, blockCounter.size()));
+            Main.print("\rGenerating table... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data.append("<td>");
             data.append(Main.modernizeIDs ? Main.getStringID(key) : key);
             data.append("</td>");

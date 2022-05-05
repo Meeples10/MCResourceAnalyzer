@@ -17,7 +17,7 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
             e.printStackTrace();
         }
         duration = System.currentTimeMillis() - getStartTime();
-        System.out.println(("Completed analysis in " + Main.millisToHMS(duration)));
+        Main.println(("Completed analysis in " + Main.millisToHMS(duration)));
     }
 
     private void processWorld(File worldFile) throws Exception {
