@@ -47,40 +47,46 @@ public abstract class RegionAnalyzer {
                 - (blockCounter.containsKey("minecraft:air") ? blockCounter.get("minecraft:air") : 0)
                 - (blockCounter.containsKey("minecraft:cave_air") ? blockCounter.get("minecraft:cave_air") : 0));
         System.out.print("Generating CSV... ");
-        String data = "id,";
+        StringBuilder data = new StringBuilder();
+        data.append("id,");
         int minY = getMinimumY();
         int maxY = getMaximumY();
         for(int i = minY; i <= maxY; i++) {
-            data += i + ",";
+            data.append(i);
+            data.append(",");
         }
-        data += "total,percent_of_total,percent_excluding_air\n";
+        data.append("total,percent_of_total,percent_excluding_air\n");
         int digits = String.valueOf(blockCounter.size()).length();
         String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
         int keyIndex = 0;
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
             System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
-            data += key + ",";
+            data.append(key);
+            data.append(",");
             for(int i = minY; i <= maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
-                    data += "0,";
+                    data.append("0,");
                 } else {
-                    data += heightCounter.get(key).get(i) + ",";
+                    data.append(heightCounter.get(key).get(i));
+                    data.append(",");
                 }
             }
-            data += blockCounter.get(key) + ","
-                    + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d);
+            data.append(blockCounter.get(key));
+            data.append(",");
+            data.append(Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / (double) totalBlocks) * 100.0d));
             if(key.equals("0") || key.equals("minecraft:air") || key.equals("minecraft:cave_air")
                     || key.equals("minecraft:void_air")) {
-                data += ",N/A";
+                data.append(",N/A");
             } else {
-                data += "," + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d);
+                data.append(",");
+                data.append(Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d));
             }
-            data += "\n";
+            data.append("\n");
         }
         try {
             File out = new File(Main.getOutputPrefix() + ".csv");
-            Main.writeStringToFile(out, data);
+            Main.writeStringToFile(out, data.toString());
             System.out.println("\nData written to " + out.getAbsolutePath());
         } catch(IOException e) {
             e.printStackTrace();
@@ -113,19 +119,22 @@ public abstract class RegionAnalyzer {
     public String generateTable(double totalBlocks, double totalExcludingAir) {
         int minY = getMinimumY();
         int maxY = getMaximumY();
-        String data = "<table>\n";
-        data += "<tr><th>id</th><th>";
+        StringBuilder data = new StringBuilder();
+        data.append("<table>\n<tr><th>id</th><th>");
         for(int i = minY; i < maxY; i++) {
-            data += i + "</th><th>";
+            data.append(i);
+            data.append("</th><th>");
         }
-        data += "total</th><th>percent_of_total</th><th>percent_excluding_air</th></tr>\n<tr>";
+        data.append("total</th><th>percent_of_total</th><th>percent_excluding_air</th></tr>\n<tr>");
         int digits = String.valueOf(blockCounter.size()).length();
         String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
         int keyIndex = 0;
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
             System.out.print("\rGenerating table... " + String.format(completionFormat, keyIndex, blockCounter.size()));
-            data += "<td>" + (Main.modernizeIDs ? Main.getStringID(key) : key) + "</td>";
+            data.append("<td>");
+            data.append(Main.modernizeIDs ? Main.getStringID(key) : key);
+            data.append("</td>");
             for(int i = minY; i < maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
                     data += "<td>0</td>";
