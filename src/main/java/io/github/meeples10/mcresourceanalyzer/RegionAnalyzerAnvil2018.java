@@ -77,6 +77,7 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
             bitLength = bitLength < 4 ? 4 : bitLength;
             int[] blocks = Main.unstream(bitLength, 64, false, blockStates);
             int sectionY = tag.getByte("Y");
+
             for(int y = 0; y < 16; y++) {
                 for(int x = 0; x < 16; x++) {
                     for(int z = 0; z < 16; z++) {

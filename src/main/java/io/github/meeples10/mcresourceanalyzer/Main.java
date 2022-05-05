@@ -233,11 +233,11 @@ public class Main {
         return lines;
     }
 
-    public static void print(String s) {
+    public static void print(Object s) {
         if(!silent) System.out.print(s);
     }
 
-    public static void println(String s) {
+    public static void println(Object s) {
         if(!silent) System.out.println(s);
     }
 }
