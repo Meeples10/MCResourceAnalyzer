@@ -137,21 +137,26 @@ public abstract class RegionAnalyzer {
             data.append("</td>");
             for(int i = minY; i < maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
-                    data += "<td>0</td>";
+                    data.append("<td>0</td>");
                 } else {
-                    data += "<td>" + heightCounter.get(key).get(i) + "</td>";
+                    data.append("<td>");
+                    data.append(heightCounter.get(key).get(i));
+                    data.append("</td>");
                 }
             }
-            data += "<td>" + blockCounter.get(key) + "</td><td>"
-                    + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalBlocks) * 100.0d) + "</td>";
+            data.append("<td>");
+            data.append(blockCounter.get(key));
+            data.append("</td><td>");
+            data.append(Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalBlocks) * 100.0d));
+            data.append("</td>");
             if(key.equals("minecraft:air") || key.equals("minecraft:cave_air")) {
-                data += "<td>N/A</td>";
+                data.append("<td>N/A</td>");
             } else {
-                data += "<td>"
-                        + Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d)
-                        + "</td>";
+                data.append("<td>");
+                data.append(Main.DECIMAL_FORMAT.format(((double) blockCounter.get(key) / totalExcludingAir) * 100.0d));
+                data.append("</td>");
             }
-            data += "</tr>\n<tr>";
+            data.append("</tr>\n<tr>");
         }
         return data.substring(0, data.length() - 4) + "</table>";
     }
