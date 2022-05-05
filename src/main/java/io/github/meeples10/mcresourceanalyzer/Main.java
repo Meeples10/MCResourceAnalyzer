@@ -30,6 +30,7 @@ public class Main {
     static boolean versionOverride = false;
     static boolean modernizeIDs = false;
     static boolean inputOverride = false;
+    static boolean silent = false;
     static String outputPrefix = "";
 
     public static void main(String[] args) {
@@ -85,6 +86,8 @@ public class Main {
                 inputFile = new File(arg.split("=", 2)[1]);
             } else if(arg.toLowerCase().startsWith("output-prefix=")) {
                 outputPrefix = arg.split("=", 2)[1].trim();
+            } else if(arg.equalsIgnoreCase("silent")) {
+                silent = true;
             } else {
                 System.err.println("Unknown argument: " + arg);
             }
@@ -95,7 +98,7 @@ public class Main {
         } catch(IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
+        Main.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
                 + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
                 + (versionOverride ? selectedVersion : versionSelect) + "\nModernize block IDs: " + modernizeIDs
                 + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
@@ -127,7 +130,7 @@ public class Main {
             }
         }
         analyzer.run(inputFile);
-        System.out.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
+        Main.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
     }
 
     public static String formatRegionName(File parent, File f) {
@@ -228,5 +231,13 @@ public class Main {
         }
         reader.close();
         return lines;
+    }
+
+    public static void print(String s) {
+        if(!silent) System.out.print(s);
+    }
+
+    public static void println(String s) {
+        if(!silent) System.out.println(s);
     }
 }

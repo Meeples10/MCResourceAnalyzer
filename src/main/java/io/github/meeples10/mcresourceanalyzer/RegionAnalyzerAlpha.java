@@ -20,10 +20,10 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
         }
 
         if(chunkFiles.size() == 0) {
-            System.out.println("Error: World directory is empty");
+            System.err.println("Error: World directory is empty");
             System.exit(1);
         }
-        System.out.println(chunkFiles.size() + " chunks found");
+        Main.println(chunkFiles.size() + " chunks found");
         int cnum = 1;
         for(File f : chunkFiles) {
             long startTime = System.currentTimeMillis();
@@ -36,12 +36,12 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
                 e.printStackTrace();
             }
 
-            System.out.println(
+            Main.println(
                     "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
             cnum++;
         }
         duration = System.currentTimeMillis() - getStartTime();
-        System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
+        Main.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
     }
 
     private void processChunk(File chunkFile) throws Exception {

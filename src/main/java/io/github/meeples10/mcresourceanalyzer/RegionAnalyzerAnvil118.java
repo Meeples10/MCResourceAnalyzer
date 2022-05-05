@@ -15,21 +15,21 @@ public class RegionAnalyzerAnvil118 extends RegionAnalyzer {
     @Override
     public void analyze(File regionDir) {
         if(!regionDir.exists()) {
-            System.out.println("Error: No region directory found at " + regionDir.getAbsolutePath());
+            System.err.println("Error: No region directory found at " + regionDir.getAbsolutePath());
             System.exit(1);
         }
         int totalRegions = regionDir.listFiles().length;
         if(totalRegions == 0) {
-            System.out.println("Error: Region directory is empty");
+            System.err.println("Error: Region directory is empty");
             System.exit(1);
         }
-        System.out.println(totalRegions + " regions found");
+        Main.println(totalRegions + " regions found");
         int rnum = 1;
         for(File f : regionDir.listFiles()) {
             long startTime = System.currentTimeMillis();
             String name = Main.formatRegionName(regionDir, f);
             RegionFile r = new RegionFile(f);
-            System.out.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
+            Main.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
                     + Main.DATE_FORMAT.format(new Date(r.lastModified())) + ")... ");
             for(int x = 0; x < 32; x++) {
                 for(int z = 0; z < 32; z++) {
@@ -42,12 +42,12 @@ public class RegionAnalyzerAnvil118 extends RegionAnalyzer {
                     }
                 }
             }
-            System.out.println(
+            Main.println(
                     "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
             rnum++;
         }
         duration = System.currentTimeMillis() - getStartTime();
-        System.out.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
+        Main.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
     }
 
     private void processRegion(RegionFile r, String name, int x, int z) throws Exception {
