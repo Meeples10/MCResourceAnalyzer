@@ -62,7 +62,7 @@ public abstract class RegionAnalyzer {
         for(String key : heightCounter.keySet()) {
             keyIndex += 1;
             System.out.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
-            data.append(key);
+            data.append(Main.modernizeIDs ? Main.getStringID(key) : key);
             data.append(",");
             for(int i = minY; i <= maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
