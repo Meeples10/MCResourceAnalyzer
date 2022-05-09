@@ -14,7 +14,7 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
     @Override
     public void analyze(File world) {
         List<File> chunkFiles = new ArrayList<>();
-        for(File f : world.listFiles()) {
+        for(File f : world.listFiles(Main.DS_STORE_FILTER)) {
             if(!f.isDirectory()) continue;
             chunkFiles.addAll(traverseSubdirectories(f));
         }

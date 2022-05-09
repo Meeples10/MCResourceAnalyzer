@@ -18,14 +18,14 @@ public class RegionAnalyzerAnvil118 extends RegionAnalyzer {
             System.err.println("Error: No region directory found at " + regionDir.getAbsolutePath());
             System.exit(1);
         }
-        int totalRegions = regionDir.listFiles().length;
+        int totalRegions = regionDir.listFiles(Main.DS_STORE_FILTER).length;
         if(totalRegions == 0) {
             System.err.println("Error: Region directory is empty");
             System.exit(1);
         }
         Main.println(totalRegions + " regions found");
         int rnum = 1;
-        for(File f : regionDir.listFiles()) {
+        for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
             long startTime = System.currentTimeMillis();
             String name = Main.formatRegionName(regionDir, f);
             RegionFile r = new RegionFile(f);
