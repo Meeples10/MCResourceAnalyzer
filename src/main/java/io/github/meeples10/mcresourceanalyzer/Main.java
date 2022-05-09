@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,6 +21,12 @@ import javax.swing.JOptionPane;
 
 public class Main {
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
+    public static final FilenameFilter DS_STORE_FILTER = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+            return !name.equals(".DS_Store");
+        }
+    };
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.##########");
     public static final Map<String, String> BLOCK_NAMES = new HashMap<>();
     public static final List<Integer> BLOCKS_TO_MERGE = new ArrayList<>();
