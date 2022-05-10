@@ -94,7 +94,7 @@ public abstract class RegionAnalyzer {
         }
         if(Main.generateTable) {
             try {
-                File out = new File(Main.getOutputPrefix() + "_table.html");
+                File out = new File(Main.getOutputPrefix() + ".html");
                 Main.writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
                 Main.println("\nTable written to " + out.getAbsolutePath());
             } catch(IOException e) {
