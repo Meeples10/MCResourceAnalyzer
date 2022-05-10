@@ -20,6 +20,7 @@ Several command line arguments may be used to modify the behavior of the program
 
 - `no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
 - `table`: Generates a simple HTML table with the collected data.
+- `table-template=<path>`: When used in conjunction with `table`, the generated table will replace any instances of the string `{{{TABLE}}}` in a copy of the template file. Note that the table will not include `<table></table>` tags when using this argument.
 - `version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Shows a popup on launch that allows the version in which the region files were generated to be selected. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior.
 Alternatively, to explicitly specify a version from the command line and skip the popup, use the argument `version-select=<version>` where `<version>` is one of the following:
   - `ANVIL_118` for 1.18

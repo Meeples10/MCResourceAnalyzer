@@ -8,6 +8,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -39,6 +40,8 @@ public class Main {
     static boolean inputOverride = false;
     static boolean silent = false;
     static String outputPrefix = "";
+    static String tableTemplatePath = "";
+    static String tableTemplate = "";
 
     public static void main(String[] args) {
         DECIMAL_FORMAT.setMaximumFractionDigits(10);
@@ -95,6 +98,19 @@ public class Main {
                 outputPrefix = arg.split("=", 2)[1].trim();
             } else if(arg.equalsIgnoreCase("silent")) {
                 silent = true;
+            } else if(arg.toLowerCase().startsWith("table-template=")) {
+                File template = new File(arg.split("=", 2)[1].trim());
+                if(!template.exists() || template.isDirectory()) {
+                    System.err.println("Invalid table template: " + template.getPath());
+                    System.exit(1);
+                }
+                tableTemplatePath = template.getPath();
+                try {
+                    tableTemplate = String.join("\n", Files.readAllLines(template.toPath()));
+                } catch(IOException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
             } else {
                 System.err.println("Unknown argument: " + arg);
             }
@@ -106,11 +122,14 @@ public class Main {
             e.printStackTrace();
         }
         Main.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
-                + "\nGenerate HTML table: " + generateTable + "\nVersion select: "
-                + (versionOverride ? selectedVersion : versionSelect) + "\nModernize block IDs: " + modernizeIDs
-                + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
-                + inputFile.getPath() + "\nOutput prefix: " + (outputPrefix.equals("") ? "(default)" : outputPrefix)
-                + "\n--------------------------------");
+                + "\nGenerate HTML table: " + generateTable
+                + (generateTable
+                        ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
+                        : "")
+                + "\nVersion select: " + (versionOverride ? selectedVersion : versionSelect) + "\nModernize block IDs: "
+                + modernizeIDs + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: "
+                + BLOCKS_TO_MERGE.size() + "\nInput: " + inputFile.getPath() + "\nOutput prefix: "
+                + (outputPrefix.equals("") ? "(default)" : outputPrefix) + "\n--------------------------------");
         RegionAnalyzer analyzer;
         if(versionSelect) {
             Object returnedVersion = JOptionPane.showInputDialog(null,
