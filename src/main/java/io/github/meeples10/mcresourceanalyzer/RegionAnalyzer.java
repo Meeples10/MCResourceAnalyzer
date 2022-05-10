@@ -120,7 +120,10 @@ public abstract class RegionAnalyzer {
         int minY = getMinimumY();
         int maxY = getMaximumY();
         StringBuilder data = new StringBuilder();
-        data.append("<table>\n<tr><th>id</th><th>");
+        if(Main.tableTemplate.isEmpty()) {
+            data.append("<table>\n");
+        }
+        data.append("<tr><th>id</th><th>");
         for(int i = minY; i < maxY; i++) {
             data.append(i);
             data.append("</th><th>");
@@ -158,7 +161,12 @@ public abstract class RegionAnalyzer {
             }
             data.append("</tr>\n<tr>");
         }
-        return data.substring(0, data.length() - 4) + "</table>";
+        String out = data.substring(0, data.length() - 4);
+        if(Main.tableTemplate.isEmpty()) {
+            return out + "</table>";
+        } else {
+            return Main.tableTemplate.replace("{{{TABLE}}}", out);
+        }
     }
 
     public long getStartTime() {
