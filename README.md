@@ -30,7 +30,7 @@ java -jar mc-resource-analyzer-x.x.x.jar [-hHmsStV] [-B=PATH] [-M=PATH] [-o=STRI
 - `-s`, `--statistics`: Outputs a file with statistics about the analysis.
 - `-o`, `--output-prefix`: Use this argument to add a prefix to the program's output files. For example, using `-o abc` would result in the files `abc.csv` and `abc_table.html`.
 - `-v`, `--version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Selecting a version that does not match the version with which the regions were generated may result in unexpected behavior. The following versions are supported:
-  - `ANVIL_118` for 1.18 to 1.20
+  - `ANVIL_118` for 1.18 to 1.20.1
   - `ANVIL_2021` for 1.16 to 1.17
   - `ANVIL_2018` for 1.13 to 1.15
   - `ANVIL_2012` for 1.2 to 1.12
@@ -46,7 +46,7 @@ java -jar mc-resource-analyzer-x.x.x.jar [-hHmsStV] [-B=PATH] [-M=PATH] [-o=STRI
 
 ### Version compatibility
 
-MCResourceAnalyzer 1.2.0 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.20.
+MCResourceAnalyzer 1.2.0 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.20.1.
 
 Note that Indev worlds with the `Long` and `Deep` world shapes are not supported.
 
