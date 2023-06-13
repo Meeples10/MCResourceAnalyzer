@@ -232,26 +232,20 @@ public abstract class RegionAnalyzer {
     }
 
     public enum Version {
-        ANVIL_118("Anvil (1.18)", RegionAnalyzerAnvil118.class, true), ANVIL_2021("Anvil (1.16 to 1.17)",
-                RegionAnalyzerAnvil2021.class, true), ANVIL_2018("Anvil (1.13 to 1.15)", RegionAnalyzerAnvil2018.class,
-                        true), ANVIL_2012("Anvil (1.2 to 1.12)", RegionAnalyzerAnvil2012.class, true), MCREGION(
-                                "McRegion (Beta 1.3 to 1.1)", RegionAnalyzerMCRegion.class,
-                                true), ALPHA("Alpha (Infdev 20100327 to Beta 1.2)", RegionAnalyzerAlpha.class,
-                                        true), INDEV("Indev (Indev 0.31 20100122 to Infdev 20100325)",
-                                                RegionAnalyzerIndev.class, false);
+        ANVIL_118(RegionAnalyzerAnvil118.class, true),
+        ANVIL_2021(RegionAnalyzerAnvil2021.class, true),
+        ANVIL_2018(RegionAnalyzerAnvil2018.class, true),
+        ANVIL_2012(RegionAnalyzerAnvil2012.class, true),
+        MCREGION(RegionAnalyzerMCRegion.class, true),
+        ALPHA(RegionAnalyzerAlpha.class, true),
+        INDEV(RegionAnalyzerIndev.class, false);
 
-        private final String versionName;
         private final Class<? extends RegionAnalyzer> analyzerClass;
         private final boolean usesDirectory;
 
-        private Version(String versionName, Class<? extends RegionAnalyzer> analyzerClass, boolean usesDirectory) {
-            this.versionName = versionName;
+        private Version(Class<? extends RegionAnalyzer> analyzerClass, boolean usesDirectory) {
             this.analyzerClass = analyzerClass;
             this.usesDirectory = usesDirectory;
-        }
-
-        public String toString() {
-            return versionName;
         }
 
         public RegionAnalyzer getAnalyzerInstance() throws InstantiationException, IllegalAccessException {

@@ -18,7 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JOptionPane;
+import picocli.CommandLine;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Model.OptionSpec;
+import picocli.CommandLine.Model.PositionalParamSpec;
+import picocli.CommandLine.ParseResult;
 
 public class Main {
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
@@ -31,90 +35,24 @@ public class Main {
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.##########");
     public static final Map<String, String> BLOCK_NAMES = new HashMap<>();
     public static final List<Integer> BLOCKS_TO_MERGE = new ArrayList<>();
+    static RegionAnalyzer.Version selectedVersion = RegionAnalyzer.Version.values()[0];
+    static File inputFile = new File("region");
     static boolean saveStatistics = false;
     static boolean allowHack = true;
     static boolean generateTable = false;
-    static boolean versionSelect = false;
-    static boolean versionOverride = false;
     static boolean modernizeIDs = false;
-    static boolean inputOverride = false;
     static boolean silent = false;
     static String outputPrefix = "";
     static String tableTemplatePath = "";
     static String tableTemplate = "";
 
     public static void main(String[] args) {
-        DECIMAL_FORMAT.setMaximumFractionDigits(10);
-        RegionAnalyzer.Version selectedVersion = RegionAnalyzer.Version.values()[0];
-        File inputFile = new File("region");
-        for(String arg : args) {
-            if(arg.equalsIgnoreCase("statistics")) {
-                saveStatistics = true;
-            } else if(arg.equalsIgnoreCase("no-hack")) {
-                allowHack = false;
-            } else if(arg.equalsIgnoreCase("table")) {
-                generateTable = true;
-            } else if(arg.equalsIgnoreCase("version-select")) {
-                versionSelect = true;
-            } else if(arg.toLowerCase().startsWith("version-select=")) {
-                versionOverride = true;
-                String v = arg.split("=", 2)[1].toUpperCase();
-                try {
-                    selectedVersion = RegionAnalyzer.Version.valueOf(v);
-                } catch(IllegalArgumentException e) {
-                    System.err.println("Invalid version: " + v);
-                    System.err.print("Version must be one of the following: ");
-                    for(RegionAnalyzer.Version version : RegionAnalyzer.Version.values()) {
-                        System.err.print(version.name() + " ");
-                    }
-                    System.err.print("\n");
-                    System.exit(1);
-                }
-            } else if(arg.toLowerCase().startsWith("blocks=")) {
-                try {
-                    for(String line : readLines(new FileInputStream(new File(arg.split("=", 2)[1])))) {
-                        if(line.length() == 0) continue;
-                        String[] split = line.split("=", 2);
-                        BLOCK_NAMES.put(split[0], split[1]);
-                    }
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
-            } else if(arg.toLowerCase().startsWith("merge=")) {
-                try {
-                    for(String line : readLines(new FileInputStream(new File(arg.split("=", 2)[1])))) {
-                        if(line.length() == 0) continue;
-                        BLOCKS_TO_MERGE.add(Integer.valueOf(line.trim()));
-                    }
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
-            } else if(arg.equalsIgnoreCase("modernize-ids")) {
-                modernizeIDs = true;
-            } else if(arg.toLowerCase().startsWith("input=")) {
-                inputOverride = true;
-                inputFile = new File(arg.split("=", 2)[1]);
-            } else if(arg.toLowerCase().startsWith("output-prefix=")) {
-                outputPrefix = arg.split("=", 2)[1].trim();
-            } else if(arg.equalsIgnoreCase("silent")) {
-                silent = true;
-            } else if(arg.toLowerCase().startsWith("table-template=")) {
-                File template = new File(arg.split("=", 2)[1].trim());
-                if(!template.exists() || template.isDirectory()) {
-                    System.err.println("Invalid table template: " + template.getPath());
-                    System.exit(1);
-                }
-                tableTemplatePath = template.getPath();
-                try {
-                    tableTemplate = String.join("\n", Files.readAllLines(template.toPath()));
-                } catch(IOException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
-            } else {
-                System.err.println("Unknown argument: " + arg);
-            }
-        }
+        CommandLine commandLine = new CommandLine(createCommandSpec());
+        commandLine.setCaseInsensitiveEnumValuesAllowed(true);
+        commandLine.setExecutionStrategy(Main::parseArgs);
+        int exitCode = commandLine.execute(args);
+        if(exitCode != 0 || commandLine.isUsageHelpRequested() || commandLine.isVersionHelpRequested())
+            System.exit(exitCode);
         try {
             loadBlockNames();
             loadBlocksToMerge();
@@ -124,21 +62,14 @@ public class Main {
         Main.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
                 + "\nGenerate HTML table: " + generateTable
                 + (generateTable
-                        ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
+                        ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)"
+                                : tableTemplatePath))
                         : "")
-                + "\nVersion select: " + (versionOverride ? selectedVersion : versionSelect) + "\nModernize block IDs: "
-                + modernizeIDs + "\nBlock IDs: " + BLOCK_NAMES.size() + "\nBlock IDs to merge: "
-                + BLOCKS_TO_MERGE.size() + "\nInput: " + inputFile.getPath() + "\nOutput prefix: "
-                + (outputPrefix.equals("") ? "(default)" : outputPrefix) + "\n--------------------------------");
+                + "\nRegion version: " + selectedVersion + "\nModernize block IDs: " + modernizeIDs + "\nBlock IDs: "
+                + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
+                + inputFile.getPath() + "\nOutput prefix: " + (outputPrefix.equals("") ? "(default)" : outputPrefix)
+                + "\n--------------------------------");
         RegionAnalyzer analyzer;
-        if(versionSelect) {
-            Object returnedVersion = JOptionPane.showInputDialog(null,
-                    "Select the format in which the region files were saved:", "Select Version",
-                    JOptionPane.PLAIN_MESSAGE, null, RegionAnalyzer.Version.values(),
-                    RegionAnalyzer.Version.values()[0]);
-            if(!(returnedVersion instanceof RegionAnalyzer.Version)) System.exit(0);
-            selectedVersion = (RegionAnalyzer.Version) returnedVersion;
-        }
         try {
             analyzer = selectedVersion.getAnalyzerInstance();
         } catch(InstantiationException | IllegalAccessException e) {
@@ -148,15 +79,98 @@ public class Main {
         }
         if(analyzer == null) analyzer = new RegionAnalyzerAnvil118();
         analyzer.setVersion(selectedVersion);
-        if(inputOverride) {
-            if(inputFile.isDirectory() != selectedVersion.usesDirectory()) {
-                System.err.println("Input must be a " + (selectedVersion.usesDirectory() ? "directory" : "file") + ": "
-                        + inputFile.getAbsolutePath());
-                System.exit(1);
-            }
+        if(inputFile.isDirectory() != selectedVersion.usesDirectory()) {
+            System.err.println("Input must be a " + (selectedVersion.usesDirectory() ? "directory" : "file") + ": "
+                    + inputFile.getAbsolutePath());
+            System.exit(1);
         }
         analyzer.run(inputFile);
         Main.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
+    }
+
+    private static CommandSpec createCommandSpec() {
+        CommandSpec spec = CommandSpec.create();
+        spec.mixinStandardHelpOptions(true);
+        spec.addOption(
+                OptionSpec.builder("-v", "--version-select").paramLabel("VERSION").type(RegionAnalyzer.Version.class)
+                        .description("Selects the version with which the region files were generated.").build());
+        spec.addOption(OptionSpec.builder("-o", "--output-prefix").paramLabel("STRING").type(String.class)
+                .description("Adds a prefix to the program's output files.").build());
+        spec.addOption(OptionSpec.builder("-t", "--table")
+                .description("Generates a simple HTML table with the collected data.").build());
+        spec.addOption(OptionSpec.builder("-T", "--table-template").paramLabel("PATH").type(int.class).description(
+                "All instances of {{{TABLE}}} in the given file will be replaced by the table generated by the -t option.")
+                .build());
+        spec.addOption(OptionSpec.builder("-s", "--statistics")
+                .description("Outputs a file with statistics about the analysis.").build());
+        spec.addOption(
+                OptionSpec.builder("-S", "--silent").description("Silences all output aside from errors.").build());
+        spec.addOption(OptionSpec.builder("-m", "--modernize-ids")
+                .description("If analyzing regions saved before 1.13, numeric block IDs will be replaced with"
+                        + "their modern string representations (when possible).")
+                .build());
+        spec.addOption(OptionSpec.builder("-B", "--block-ids").paramLabel("PATH").type(String.class)
+                .description("When using the -m option on a world with block IDs outside the range of 0-255,"
+                        + "use this to specify the path to a file containing block IDs.")
+                .build());
+        spec.addOption(OptionSpec.builder("-M", "--merge-ids").paramLabel("PATH").type(String.class)
+                .description("When analyzing a world with block IDs outside the range of 0-255, any block with an"
+                        + "ID listed in this file will have all of its variants merged into a single value..")
+                .build());
+        spec.addOption(OptionSpec.builder("-H", "--no-hack").description(
+                "The program attempts to compensate for inaccuracies at high Y values by assuming that empty chunk"
+                        + "sections are filled with air. Use this option to disable this hack.")
+                .build());
+        spec.addPositional(PositionalParamSpec.builder().paramLabel("INPUT").arity("0..1").type(String.class)
+                .description("The region directory or .mclevel file to analyze.").build());
+        return spec;
+    }
+
+    private static int parseArgs(ParseResult pr) {
+        saveStatistics = pr.hasMatchedOption('s');
+        allowHack = pr.hasMatchedOption('H');
+        generateTable = pr.hasMatchedOption('t');
+        modernizeIDs = pr.hasMatchedOption('m');
+        silent = pr.hasMatchedOption('S');
+        if(pr.hasMatchedOption('v')) selectedVersion = pr.matchedOption('v').getValue();
+        if(pr.hasMatchedPositional(0)) inputFile = new File((String) pr.matchedPositional(0).getValue());
+        if(pr.hasMatchedOption('o')) outputPrefix = pr.matchedOption('o').getValue();
+        if(pr.hasMatchedOption('B')) {
+            try {
+                for(String line : readLines(new FileInputStream(new File((String) pr.matchedOption('B').getValue())))) {
+                    if(line.length() == 0) continue;
+                    String[] split = line.split("=", 2);
+                    BLOCK_NAMES.put(split[0], split[1]);
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(pr.hasMatchedOption('M')) {
+            try {
+                for(String line : readLines(new FileInputStream(new File((String) pr.matchedOption('M').getValue())))) {
+                    if(line.length() == 0) continue;
+                    BLOCKS_TO_MERGE.add(Integer.valueOf(line.trim()));
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(pr.hasMatchedOption('T')) {
+            File template = new File((String) pr.matchedOption('T').getValue());
+            if(!template.exists() || template.isDirectory()) {
+                System.err.println("Invalid table template: " + template.getPath());
+                System.exit(1);
+            }
+            tableTemplatePath = template.getPath();
+            try {
+                tableTemplate = String.join("\n", Files.readAllLines(template.toPath()));
+            } catch(IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        return 0;
     }
 
     public static String formatRegionName(File parent, File f) {
