@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +17,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import picocli.CommandLine;
+import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Model.OptionSpec;
 import picocli.CommandLine.Model.PositionalParamSpec;
 import picocli.CommandLine.ParseResult;
 
 public class Main {
-    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
     public static final FilenameFilter DS_STORE_FILTER = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
@@ -55,6 +53,7 @@ public class Main {
         if(commandLine.getCommandName().equals("<main class>"))
             commandLine.setCommandName("java -jar mc-resource-analyzer-x.x.x.jar");
         if(commandLine.isUsageHelpRequested()) commandLine.usage(System.out);
+        if(commandLine.isVersionHelpRequested()) commandLine.printVersionHelp(System.out);
         if(exitCode != 0 || commandLine.isUsageHelpRequested() || commandLine.isVersionHelpRequested())
             System.exit(exitCode);
         try {
@@ -93,7 +92,15 @@ public class Main {
 
     private static CommandSpec createCommandSpec() {
         CommandSpec spec = CommandSpec.create();
-        spec.mixinStandardHelpOptions(true);
+        spec.mixinStandardHelpOptions(true).versionProvider(new IVersionProvider() {
+            @Override
+            public String[] getVersion() throws Exception {
+                List<String> lines = readLines(Main.class.getResourceAsStream("/version.properties"));
+                return new String[] {
+                        String.format("@|white,bold %s %s|@ @|faint %s|@", lines.get(0), lines.get(1), lines.get(2)),
+                        String.format("@|yellow %s|@", lines.get(3)) };
+            }
+        });
         spec.addOption(
                 OptionSpec.builder("-v", "--version-select").paramLabel("VERSION").type(RegionAnalyzer.Version.class)
                         .description("Selects the version with which the region files were generated.").build());
@@ -202,7 +209,6 @@ public class Main {
         for(int i = 0; i < data.length; i++) {
             for(int n = 0; n < wordSize; n++) {
                 int bit = (int) ((data[i] >> n) & 0x01);
-                // v = (v << 1) | bit;
                 v = (bit << bl) | v;
                 bl++;
                 if(bl >= bitsPerValue) {
@@ -251,14 +257,15 @@ public class Main {
         for(String line : readLines(Main.class.getResourceAsStream("/blocks.properties"))) {
             if(line.length() == 0) continue;
             String[] split = line.split("=", 2);
-            BLOCK_NAMES.put(split[0], split[1]);
+            if(!BLOCK_NAMES.containsKey(split[0])) BLOCK_NAMES.put(split[0], split[1]);
         }
     }
 
     private static void loadBlocksToMerge() throws IOException {
         for(String line : readLines(Main.class.getResourceAsStream("/merge.properties"))) {
             if(line.length() == 0) continue;
-            BLOCKS_TO_MERGE.add(Integer.valueOf(line.trim()));
+            int i = Integer.valueOf(line.trim());
+            if(!BLOCKS_TO_MERGE.contains(i)) BLOCKS_TO_MERGE.add(i);
         }
     }
 

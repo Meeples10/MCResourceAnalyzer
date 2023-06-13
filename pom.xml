@@ -3,11 +3,23 @@
 
     <groupId>io.github.meeples10.mcresourceanalyzer</groupId>
     <artifactId>mc-resource-analyzer</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
+
+    <name>MCResourceAnalyzer</name>
+    <url>https://github.com/Meeples10/MCResourceAnalyzer</url>
+    <description>Analyze Minecraft region files to determine the empirical distribution of block types.</description>
+    <licenses>
+        <license>
+            <name>BSD-3-Clause</name>
+            <url>https://spdx.org/licenses/BSD-3-Clause.html</url>
+        </license>
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -19,6 +31,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
