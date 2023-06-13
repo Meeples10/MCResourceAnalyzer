@@ -1,6 +1,6 @@
 # Minecraft Resource Analyzer
 
-For more information, see [this page](https://meeples10.github.io/resource-distribution/index.html).
+For more information, see [this page](https://meeples10.github.io/resource-distribution).
 
 This is a standalone program created to replace [this plugin](https://github.com/Meeples10/ChunkAnalyzer).
 
@@ -48,4 +48,4 @@ Note that Indev worlds with the `Long` and `Deep` world shapes are not supported
 
 Contributions to this project are more than welcome. If you create your own fork, my only request is that you include the following URL somewhere in your fork: https://github.com/Meeples10/MCResourceAnalyzer
 
-If you notice that the program fails to analyze a particular world, please [create an issue](https://github.com/Meeples10/MCResourceAnalyzer/issues/new?title=Error%20when%20analyzing%20world&body=Minecraft%20version:%20%0A%0AProgram%20output:%0A%60%60%60%0A[paste%20output%20here]%0A%60%60%60%0A%0AOther%20details:%20%0A%0A%3C%21--%20If%20possible,%20please%20attach%20the%20region%20file%20that%20caused%20the%20program%20to%20fail%20--%3E) with the version of Minecraft with which the world was generated, the output of the program, and, if possible, the region file that caused the program to fail.
+If you notice that the program fails to analyze a particular world, please [create an issue](https://github.com/Meeples10/MCResourceAnalyzer/issues/new?title=Error%20when%20analyzing%20world&body=Minecraft%20version:%20%0A%0AProgram%20output:%0A%60%60%60%0A[paste%20output%20here]%0A%60%60%60%0A%0AOther%20details:%20%0A%0A%3C%21--%20If%20possible,%20please%20attach%20the%20region%20file%20that%20caused%20the%20failure%20--%3E) with the version of Minecraft with which the world was generated, the output of the program, and, if possible, the region file that caused the failure.
