@@ -2,12 +2,25 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionAnalyzerIndev extends RegionAnalyzer {
+
+    @Override
+    public void validateInput(File world) {
+        if(!world.exists()) {
+            System.err.println("Error: File not found: " + world.getAbsolutePath());
+            System.exit(1);
+        }
+    }
+
+    @Override
+    public void findChunks(File world) {
+        // TODO
+    }
 
     @Override
     public void analyze(File world) {
@@ -31,7 +44,6 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
             data[i] = (byte) ((rawData[i] >> 4) & (byte) 0x0F);
         }
         analyzeWorld(blocks, data, width, height);
-        chunkCount++;
     }
 
     private void analyzeWorld(byte[] blocks, byte[] data, int width, int height) {
@@ -55,7 +67,7 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
                         blockCounter.put(blockName, 1L);
                     }
                     if(!heightCounter.containsKey(blockName)) {
-                        heightCounter.put(blockName, new HashMap<Integer, Long>());
+                        heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
                     }
                     if(heightCounter.get(blockName).containsKey(y)) {
                         heightCounter.get(blockName).put(y, heightCounter.get(blockName).get(y) + 1L);

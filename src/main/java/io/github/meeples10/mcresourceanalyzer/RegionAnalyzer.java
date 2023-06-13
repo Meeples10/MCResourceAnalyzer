@@ -2,19 +2,25 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public abstract class RegionAnalyzer {
     private Version version;
     public long chunkCount = 0;
-    public Map<String, Long> blockCounter = new HashMap<String, Long>();
-    public Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
+    public Map<String, Long> blockCounter = new ConcurrentHashMap<String, Long>();
+    public Map<String, ConcurrentHashMap<Integer, Long>> heightCounter = new ConcurrentHashMap<String, ConcurrentHashMap<Integer, Long>>();
     private long firstStartTime;
     public long duration;
+    List<Region> regions = new ArrayList<>();
+    int maxThreads = Main.THREAD_COUNT;
+    private AtomicInteger complete = new AtomicInteger(0);
 
     public RegionAnalyzer() {
         firstStartTime = System.currentTimeMillis();
@@ -25,6 +31,16 @@ public abstract class RegionAnalyzer {
     }
 
     public void run(File input) {
+        validateInput(input);
+        findChunks(input);
+
+        for(Region r : regions) {
+            chunkCount += r.size();
+        }
+        System.out.printf("%d region%s, %d chunk%s found\n", regions.size(), regions.size() == 1 ? "s" : "", chunkCount,
+                chunkCount == 1 ? "s" : "");
+        maxThreads = Math.min(Main.THREAD_COUNT, regions.size());
+
         analyze(input);
 
         long totalBlocks = 0L;
@@ -114,7 +130,18 @@ public abstract class RegionAnalyzer {
         }
     }
 
+    public abstract void validateInput(File input);
+
+    public abstract void findChunks(File input);
+
     public abstract void analyze(File input);
+
+    public void updateProgress() {
+        int c = complete.incrementAndGet();
+        if(c + 1 == regions.size()) {
+            System.out.println("DONE");
+        }
+    }
 
     public String generateTable(double totalBlocks, double totalExcludingAir) {
         int minY = getMinimumY();
@@ -185,7 +212,7 @@ public abstract class RegionAnalyzer {
     void airHack(int sectionY, String airID) {
         if(Main.allowHack && sectionY < 15) {
             if(!blockCounter.containsKey(airID)) blockCounter.put(airID, 0L);
-            if(!heightCounter.containsKey(airID)) heightCounter.put(airID, new HashMap<Integer, Long>());
+            if(!heightCounter.containsKey(airID)) heightCounter.put(airID, new ConcurrentHashMap<Integer, Long>());
             for(; sectionY < 16; sectionY++) {
                 blockCounter.put(airID, blockCounter.get(airID) + 4096L);
                 for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
@@ -201,7 +228,7 @@ public abstract class RegionAnalyzer {
 
     int getMinimumY() {
         int min = Integer.MAX_VALUE;
-        for(HashMap<Integer, Long> map : heightCounter.values()) {
+        for(Map<Integer, Long> map : heightCounter.values()) {
             for(int i : map.keySet()) {
                 if(i < min) {
                     min = i;
@@ -217,7 +244,7 @@ public abstract class RegionAnalyzer {
 
     int getMaximumY() {
         int max = Integer.MIN_VALUE;
-        for(HashMap<Integer, Long> map : heightCounter.values()) {
+        for(Map<Integer, Long> map : heightCounter.values()) {
             for(int i : map.keySet()) {
                 if(i > max) {
                     max = i;

@@ -3,13 +3,26 @@ package io.github.meeples10.mcresourceanalyzer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionAnalyzerAlpha extends RegionAnalyzer {
+
+    @Override
+    public void validateInput(File world) {
+        if(!world.exists()) {
+            System.err.println("Error: No world directory found at " + world.getAbsolutePath());
+            System.exit(1);
+        }
+    }
+
+    @Override
+    public void findChunks(File input) {
+        // TODO
+    }
 
     @Override
     public void analyze(File world) {
@@ -18,7 +31,6 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
             if(!f.isDirectory()) continue;
             chunkFiles.addAll(traverseSubdirectories(f));
         }
-
         if(chunkFiles.size() == 0) {
             System.err.println("Error: World directory is empty");
             System.exit(1);
@@ -59,7 +71,6 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
             j += 2;
         }
         analyzeChunk(blocks, data);
-        chunkCount++;
     }
 
     private void analyzeChunk(byte[] blocks, byte[] data) {
@@ -83,7 +94,7 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
                         blockCounter.put(blockName, 1L);
                     }
                     if(!heightCounter.containsKey(blockName)) {
-                        heightCounter.put(blockName, new HashMap<Integer, Long>());
+                        heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
                     }
                     if(heightCounter.get(blockName).containsKey(y)) {
                         heightCounter.get(blockName).put(y, heightCounter.get(blockName).get(y) + 1L);

@@ -25,6 +25,7 @@ import picocli.CommandLine.Model.PositionalParamSpec;
 import picocli.CommandLine.ParseResult;
 
 public class Main {
+    public static final int THREAD_COUNT = 8;
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
     public static final FilenameFilter DS_STORE_FILTER = new FilenameFilter() {
         @Override
