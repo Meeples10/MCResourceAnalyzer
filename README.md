@@ -7,22 +7,31 @@ This is a standalone program created to replace [this plugin](https://github.com
 ## Using the program
 
 1. Clone the repository and build it with Maven or [download the latest release here](https://github.com/Meeples10/MCResourceAnalyzer/releases).
-2. If your world was generated with a version after Beta 1.3, copy the `region` directory from your Minecraft world into the same directory as the program (`mc-resource-analyzer-x.x.x.jar`).
-If the world was generated with a version between Infdev 20100327 and Beta 1.2, rename the entire world directory to `region` and copy it to the same directory as the program.
+2. If your world was generated with a version after Beta 1.3, use the `region` directory from your Minecraft world as the program's input.
+If the world was generated with a version between Infdev 20100327 and Beta 1.2, use the entire world directory to `region` as the program's input.
 If the world was generated with Indev, rename the save file to `world.mclevel` and copy it to the same directory as the program.
-3. Run the JAR with `java -jar mc-resource-analyzer-x.x.x.jar`, or by double-clicking it. After analyzing the regions, the program will create a file in the same directory named `data.csv`.
+3. Run the program with `java -jar mc-resource-analyzer-x.x.x.jar [options...] [input path]`. After analyzing the world, the program will create a file in the same directory named `data.csv`.
 
-Note that the numbers for `minecraft:air` may be inaccurate at high Y values due to how Minecraft stores chunks.
+Note that the numbers for `minecraft:air` may be inaccurate at high Y values due to the way Minecraft stores chunks.
 
 ### Command line arguments
 
-Several command line arguments may be used to modify the behavior of the program. Multiple arguments can be used at once (e.g. `java -jar mc-resource-analyzer-x.x.x.jar version-select modernize-ids`). All available arguments are listed below.
+```
+java -jar mc-resource-analyzer-x.x.x.jar [-hHmsStV] [-B=PATH] [-M=PATH] [-o=STRING] [-T=PATH] [-v=VERSION] [INPUT]
+```
 
-- `no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
-- `table`: Generates a simple HTML table with the collected data.
-- `table-template=<path>`: When used in conjunction with `table`, the generated table will replace any instances of the string `{{{TABLE}}}` in a copy of the template file. Note that the table will not include `<table></table>` tags when using this argument.
-- `version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Shows a popup on launch that allows the version in which the region files were generated to be selected. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior.
-Alternatively, to explicitly specify a version from the command line and skip the popup, use the argument `version-select=<version>` where `<version>` is one of the following:
+#### Positional arguments
+
+- `INPUT` (default: `region`): The to the region directory or .mclevel file to analyze. Note that the path is relative to the program's working directory.
+
+#### Options and flags
+
+- `-h`, `--help`: Show usage help.
+- `-t`, `--table`: Generates a simple HTML table with the collected data.
+- `-T`, `--table-template`: When used in conjunction with `table`, the generated table will replace any instances of the string `{{{TABLE}}}` in a copy of the template file. Note that the table will not include `<table></table>` tags when using this argument.
+- `-s`, `--statistics`: Outputs a file with statistics about the analysis.
+- `-o`, `--output-prefix`: Use this argument to add a prefix to the program's output files. For example, using `-o abc` would result in the files `abc.csv` and `abc_table.html`.
+- `-v`, `--version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior. The following versions are supported:
   - `ANVIL_118` for 1.18
   - `ANVIL_2021` for 1.16 to 1.17
   - `ANVIL_2018` for 1.13 to 1.15
@@ -30,17 +39,15 @@ Alternatively, to explicitly specify a version from the command line and skip th
   - `MCREGION` for Beta 1.3 to 1.1
   - `ALPHA` for Infdev 20100327 to Beta 1.2
   - `INDEV` for Indev 0.31 20100122 to Infdev 20100325
-- `modernize-ids`: If analyzing regions saved before 1.13, numeric block IDs will be replaced with their modern string representations. If no string corresponding to the numeric ID is found, the numeric ID will be saved instead.
-- `blocks=<path>`: When using the `modernize-ids` argument on a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [blocks.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/blocks.properties).
-- `merge=<path>`: When analyzing a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [merge.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/merge.properties). Any block with an ID listed in this file will have all of its variants merged into a single value.
-- `input=<path>`: Use this argument to specify an input region directory or .mclevel file other than the default. Note that `<path>` is relative to the program's working directory.
-- `output-prefix=<prefix>`: Use this argument to add a prefix to the program's output files. For example, using `output-prefix=abc` would result in the files `abc.csv` and `abc_table.html`.
-- `statistics`: Outputs a file with statistics about the analysis.
-- `silent`: Prevents the program from printing output, other than errors. This may result in marginally improved performance.
+- `-m`, `--modernize-ids`: If analyzing regions saved before 1.13, numeric block IDs will be replaced with their modern string representations. If no string corresponding to the numeric ID is found, the numeric ID will be saved instead.
+- `-B`, `--block-ids`: When using the `--modernize-ids` option on a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [blocks.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/blocks.properties).
+- `-M`, `--merge-ids`: When analyzing a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [merge.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/merge.properties). Any block with an ID listed in this file will have all of its variants merged into a single value.
+- `-H`, `--no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
+- `-S`, `--silent`: Prevents the program from printing output, other than errors. This may result in marginally improved performance.
 
 ### Version compatibility
 
-MCResourceAnalyzer 1.1.5 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.18.
+MCResourceAnalyzer 1.1.7 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.18.
 
 Note that Indev worlds with the `Long` and `Deep` world shapes are not supported.
 
