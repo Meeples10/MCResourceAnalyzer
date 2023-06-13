@@ -1,8 +1,6 @@
 # Minecraft Resource Analyzer
 
-For more information, see [this page](https://meeples10.github.io/resource-distribution).
-
-This is a standalone program created to replace [this plugin](https://github.com/Meeples10/ChunkAnalyzer).
+MCResourceAnalyzer gathers data from Minecraft region files to determine the empirical distribution of naturally-occurring block types. For more information, see [this page](https://meeples10.github.io/resource-distribution).
 
 ## Using the program
 
