@@ -51,6 +51,9 @@ public class Main {
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
         commandLine.setExecutionStrategy(Main::parseArgs);
         int exitCode = commandLine.execute(args);
+        if(commandLine.getCommandName().equals("<main class>"))
+            commandLine.setCommandName("java -jar mc-resource-analyzer-x.x.x.jar");
+        if(commandLine.isUsageHelpRequested()) commandLine.usage(System.out);
         if(exitCode != 0 || commandLine.isUsageHelpRequested() || commandLine.isVersionHelpRequested())
             System.exit(exitCode);
         try {
@@ -62,8 +65,7 @@ public class Main {
         Main.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
                 + "\nGenerate HTML table: " + generateTable
                 + (generateTable
-                        ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)"
-                                : tableTemplatePath))
+                        ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
                         : "")
                 + "\nRegion version: " + selectedVersion + "\nModernize block IDs: " + modernizeIDs + "\nBlock IDs: "
                 + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
