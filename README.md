@@ -31,7 +31,7 @@ java -jar mc-resource-analyzer-x.x.x.jar [-hHmsStV] [-B=PATH] [-M=PATH] [-o=STRI
 - `-T`, `--table-template`: When used in conjunction with `table`, the generated table will replace any instances of the string `{{{TABLE}}}` in a copy of the template file. Note that the table will not include `<table></table>` tags when using this argument.
 - `-s`, `--statistics`: Outputs a file with statistics about the analysis.
 - `-o`, `--output-prefix`: Use this argument to add a prefix to the program's output files. For example, using `-o abc` would result in the files `abc.csv` and `abc_table.html`.
-- `-v`, `--version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Selecting a version that does not match the version in which the regions were generated may result in unexpected behavior. The following versions are supported:
+- `-v`, `--version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Selecting a version that does not match the version with which the regions were generated may result in unexpected behavior. The following versions are supported:
   - `ANVIL_118` for 1.18
   - `ANVIL_2021` for 1.16 to 1.17
   - `ANVIL_2018` for 1.13 to 1.15
@@ -43,6 +43,7 @@ java -jar mc-resource-analyzer-x.x.x.jar [-hHmsStV] [-B=PATH] [-M=PATH] [-o=STRI
 - `-B`, `--block-ids`: When using the `--modernize-ids` option on a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [blocks.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/blocks.properties).
 - `-M`, `--merge-ids`: When analyzing a world with block IDs outside the range of 0-255, use this to specify the path to a file containing block IDs in the same format as [merge.properties](https://github.com/Meeples10/MCResourceAnalyzer/blob/master/src/main/resources/merge.properties). Any block with an ID listed in this file will have all of its variants merged into a single value.
 - `-H`, `--no-hack`: The program attempts to compensate for the aforementioned inaccuracies at high Y values by assuming that empty chunk sections are filled with air. Use this argument to disable this hack.
+- `-n`, `--num-threads` (default: `8`): The maximum number of threads to use for analysis.
 - `-S`, `--silent`: Prevents the program from printing output, other than errors. This may result in marginally improved performance.
 
 ### Version compatibility

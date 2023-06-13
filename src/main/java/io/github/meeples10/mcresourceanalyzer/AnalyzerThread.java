@@ -1,12 +1,15 @@
 package io.github.meeples10.mcresourceanalyzer;
 
-public abstract class AnalyzerThread implements Runnable {
-    Region region;
-    Chunk chunk;
+import java.util.HashSet;
+import java.util.Set;
 
-    public AnalyzerThread(Region region, Chunk chunk) {
-        this.region = region;
-        this.chunk = chunk;
+public abstract class AnalyzerThread extends Thread {
+    final Region r;
+    final Set<Analysis> analyses = new HashSet<>();
+
+    public AnalyzerThread(Region region) {
+        r = region;
+        setName(r.name);
     }
 
     public abstract void run();

@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Region {
+class Region {
     public final RegionFile file;
     public final String name;
     public final Set<Chunk> chunks = new HashSet<>();

@@ -25,7 +25,6 @@ import picocli.CommandLine.Model.PositionalParamSpec;
 import picocli.CommandLine.ParseResult;
 
 public class Main {
-    public static final int THREAD_COUNT = 8;
     public static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy 'at' hh:mm:ss a zzz");
     public static final FilenameFilter DS_STORE_FILTER = new FilenameFilter() {
         @Override
@@ -46,6 +45,7 @@ public class Main {
     static String outputPrefix = "";
     static String tableTemplatePath = "";
     static String tableTemplate = "";
+    static int numThreads = 8;
 
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(createCommandSpec());
@@ -124,19 +124,21 @@ public class Main {
                 "The program attempts to compensate for inaccuracies at high Y values by assuming that empty chunk"
                         + "sections are filled with air. Use this option to disable this hack.")
                 .build());
+        spec.addOption(OptionSpec.builder("-n", "--num-threads").paramLabel("COUNT").type(int.class)
+                .description("The maximum number of threads to use for analysis. (default: 8)").build());
         spec.addPositional(PositionalParamSpec.builder().paramLabel("INPUT").arity("0..1").type(String.class)
-                .description("The region directory or .mclevel file to analyze.").build());
+                .description("The region directory or .mclevel file to analyze. (default: 'region')").build());
         return spec;
     }
 
     private static int parseArgs(ParseResult pr) {
+        if(pr.hasMatchedPositional(0)) inputFile = new File((String) pr.matchedPositional(0).getValue());
         saveStatistics = pr.hasMatchedOption('s');
-        allowHack = pr.hasMatchedOption('H');
+        allowHack = !pr.hasMatchedOption('H');
         generateTable = pr.hasMatchedOption('t');
         modernizeIDs = pr.hasMatchedOption('m');
         silent = pr.hasMatchedOption('S');
         if(pr.hasMatchedOption('v')) selectedVersion = pr.matchedOption('v').getValue();
-        if(pr.hasMatchedPositional(0)) inputFile = new File((String) pr.matchedPositional(0).getValue());
         if(pr.hasMatchedOption('o')) outputPrefix = pr.matchedOption('o').getValue();
         if(pr.hasMatchedOption('B')) {
             try {
@@ -172,6 +174,9 @@ public class Main {
                 e.printStackTrace();
                 System.exit(1);
             }
+        }
+        if(pr.hasMatchedOption('n')) {
+            numThreads = pr.matchedOption('n').getValue();
         }
         return 0;
     }
@@ -282,5 +287,9 @@ public class Main {
 
     public static void println(Object s) {
         if(!silent) System.out.println(s);
+    }
+
+    public static void printf(String format, Object... args) {
+        if(!silent) System.out.printf(format, args);
     }
 }

@@ -2,8 +2,8 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
+import java.util.HashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,53 +26,53 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
 
     @Override
     public void findChunks(File regionDir) {
-        // TODO
+        for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
+            Region r = new Region(f, Main.formatRegionName(regionDir, f));
+            for(int x = 0; x < 32; x++) {
+                for(int z = 0; z < 32; z++) {
+                    if(r.file.hasChunk(x, z)) r.addChunk(x, z);
+                }
+            }
+            regions.add(r);
+        }
     }
 
     @Override
-    public void analyze(File regionDir) {
+    public void analyze() {
         // The air hack does not seem to work for this version
         Main.allowHack = false;
-        int totalRegions = regionDir.listFiles(Main.DS_STORE_FILTER).length;
-        Main.println(totalRegions + " regions found");
-        int rnum = 1;
-        for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
-            long startTime = System.currentTimeMillis();
-            String name = Main.formatRegionName(regionDir, f);
-            RegionFile r = new RegionFile(f);
-            Main.print("Scanning region " + name + " [" + rnum + "/" + totalRegions + "] (modified "
-                    + Main.DATE_FORMAT.format(new Date(r.lastModified())) + ")... ");
-            for(int x = 0; x < 32; x++) {
-                for(int z = 0; z < 32; z++) {
-                    if(r.hasChunk(x, z)) {
+        for(Region r : regions) {
+            threads.add(new AnalyzerThread(r) {
+                @Override
+                public void run() {
+                    for(Chunk c : r.chunks) {
                         try {
-                            processRegion(r, name, x, z);
-                        } catch(Exception e) {
+                            Analysis a = processRegion(r.file, c.x(), c.z());
+                            if(a != null) analyses.add(a);
+                            updateProgress();
+                        } catch(IOException e) {
                             e.printStackTrace();
+                            halt();
                         }
                     }
                 }
-            }
-            Main.println(
-                    "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
-            rnum++;
+            });
         }
-        duration = System.currentTimeMillis() - getStartTime();
-        Main.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
     }
 
-    private void processRegion(RegionFile r, String name, int x, int z) throws Exception {
+    private Analysis processRegion(RegionFile r, int x, int z) throws IOException {
         DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
         if(chunkDataInputStream == null) {
             // Skip malformed chunks
-            return;
+            return null;
         }
         NBTTagList sections = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
                 .getTagList("Sections", 10);
-        analyzeChunk(sections);
+        return analyzeChunk(sections);
     }
 
-    private void analyzeChunk(NBTTagList sections) {
+    private Analysis analyzeChunk(NBTTagList sections) {
+        Analysis a = new Analysis();
         int i = 0;
         for(; i < sections.tagCount(); i++) {
             NBTTagCompound tag = sections.getCompoundTagAt(i);
@@ -94,23 +94,24 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
                         String block = palette.getStringTagAt(blocks[blockIndex]);
                         int startIndex = block.indexOf("Name:\"");
                         String blockName = block.substring(startIndex + 6, block.indexOf('"', startIndex + 6));
-                        if(blockCounter.containsKey(blockName)) {
-                            blockCounter.put(blockName, blockCounter.get(blockName) + 1L);
+                        if(a.blocks.containsKey(blockName)) {
+                            a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
                         } else {
-                            blockCounter.put(blockName, 1L);
+                            a.blocks.put(blockName, 1L);
                         }
-                        if(!heightCounter.containsKey(blockName)) {
-                            heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
+                        if(!a.heights.containsKey(blockName)) {
+                            a.heights.put(blockName, new HashMap<Integer, Long>());
                         }
-                        if(heightCounter.get(blockName).containsKey(actualY)) {
-                            heightCounter.get(blockName).put(actualY, heightCounter.get(blockName).get(actualY) + 1L);
+                        if(a.heights.get(blockName).containsKey(actualY)) {
+                            a.heights.get(blockName).put(actualY, a.heights.get(blockName).get(actualY) + 1L);
                         } else {
-                            heightCounter.get(blockName).put(actualY, 1L);
+                            a.heights.get(blockName).put(actualY, 1L);
                         }
                     }
                 }
             }
         }
-        airHack(i, "minecraft:air");
+        airHack(a, i, "minecraft:air");
+        return a;
     }
 }
