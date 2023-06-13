@@ -4,23 +4,28 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public abstract class RegionAnalyzer {
     private Version version;
-    public long chunkCount = 0;
-    public Map<String, Long> blockCounter = new ConcurrentHashMap<String, Long>();
-    public Map<String, ConcurrentHashMap<Integer, Long>> heightCounter = new ConcurrentHashMap<String, ConcurrentHashMap<Integer, Long>>();
+    public int chunkCount = 0;
+    public Map<String, Long> blockCounter = new HashMap<String, Long>();
+    public Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
     private long firstStartTime;
     public long duration;
     List<Region> regions = new ArrayList<>();
-    int maxThreads = Main.THREAD_COUNT;
-    private AtomicInteger complete = new AtomicInteger(0);
+    Set<AnalyzerThread> threads = new HashSet<>();
+    private AtomicInteger completed = new AtomicInteger(0);
 
     public RegionAnalyzer() {
         firstStartTime = System.currentTimeMillis();
@@ -32,16 +37,52 @@ public abstract class RegionAnalyzer {
 
     public void run(File input) {
         validateInput(input);
+
+        Main.print("Scanning for chunks... ");
         findChunks(input);
 
         for(Region r : regions) {
             chunkCount += r.size();
         }
-        System.out.printf("%d region%s, %d chunk%s found\n", regions.size(), regions.size() == 1 ? "s" : "", chunkCount,
-                chunkCount == 1 ? "s" : "");
-        maxThreads = Math.min(Main.THREAD_COUNT, regions.size());
+        Main.printf("%d region%s, %d chunk%s found\n", regions.size(), regions.size() == 1 ? "" : "s", chunkCount,
+                chunkCount == 1 ? "" : "s");
 
-        analyze(input);
+        analyze();
+
+        if(threads.size() > 0) {
+            System.out.println();
+            ExecutorService pool = Executors.newFixedThreadPool(Math.min(Main.numThreads, 1024));
+            for(AnalyzerThread t : threads) {
+                pool.submit(t);
+            }
+            pool.shutdown();
+            try {
+                pool.awaitTermination(100, TimeUnit.DAYS);
+            } catch(InterruptedException e) {
+                e.printStackTrace();
+            }
+            for(AnalyzerThread t : threads) {
+                for(Analysis a : t.analyses) {
+                    for(String s : a.blocks.keySet()) {
+                        blockCounter.put(s, blockCounter.getOrDefault(s, 0L) + a.blocks.get(s));
+                    }
+                    for(String s : a.heights.keySet()) {
+                        if(heightCounter.containsKey(s)) {
+                            Map<Integer, Long> existing = heightCounter.get(s);
+                            Map<Integer, Long> heights = a.heights.get(s);
+                            for(int i : heights.keySet()) {
+                                existing.put(i, existing.getOrDefault(i, 0L) + heights.get(i));
+                            }
+                        } else {
+                            heightCounter.put(s, a.heights.get(s));
+                        }
+                    }
+                }
+            }
+        }
+
+        duration = System.currentTimeMillis() - getStartTime();
+        Main.println("Completed analysis in " + Main.millisToHMS(duration));
 
         long totalBlocks = 0L;
         for(String key : blockCounter.keySet()) {
@@ -72,12 +113,7 @@ public abstract class RegionAnalyzer {
             data.append(",");
         }
         data.append("total,percent_of_total,percent_excluding_air\n");
-        int digits = String.valueOf(blockCounter.size()).length();
-        String completionFormat = "[%0" + digits + "d/%0" + digits + "d]";
-        int keyIndex = 0;
         for(String key : heightCounter.keySet()) {
-            keyIndex += 1;
-            Main.print("\rGenerating CSV... " + String.format(completionFormat, keyIndex, blockCounter.size()));
             data.append(Main.modernizeIDs ? Main.getStringID(key) : key);
             data.append(",");
             for(int i = minY; i <= maxY; i++) {
@@ -100,10 +136,11 @@ public abstract class RegionAnalyzer {
             }
             data.append("\n");
         }
+        Main.println("Done");
         try {
             File out = new File(Main.getOutputPrefix() + ".csv");
             Main.writeStringToFile(out, data.toString());
-            Main.println("\nData written to " + out.getAbsolutePath());
+            Main.println("CSV written to " + out.getAbsolutePath());
         } catch(IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -134,13 +171,20 @@ public abstract class RegionAnalyzer {
 
     public abstract void findChunks(File input);
 
-    public abstract void analyze(File input);
+    public abstract void analyze();
 
-    public void updateProgress() {
-        int c = complete.incrementAndGet();
-        if(c + 1 == regions.size()) {
-            System.out.println("DONE");
+    public synchronized void updateProgress() {
+        int c = completed.incrementAndGet() + 1;
+        if(c > chunkCount) return;
+        Main.print("Analyzing chunks [" + c + "/" + chunkCount + "]\r");
+        if(c == chunkCount) System.out.println("\n");
+    }
+
+    public synchronized void halt() {
+        for(AnalyzerThread t : threads) {
+            t.interrupt();
         }
+        System.exit(1);
     }
 
     public String generateTable(double totalBlocks, double totalExcludingAir) {
@@ -209,17 +253,17 @@ public abstract class RegionAnalyzer {
     }
 
     /* THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES */
-    void airHack(int sectionY, String airID) {
+    static void airHack(Analysis a, int sectionY, String airID) {
         if(Main.allowHack && sectionY < 15) {
-            if(!blockCounter.containsKey(airID)) blockCounter.put(airID, 0L);
-            if(!heightCounter.containsKey(airID)) heightCounter.put(airID, new ConcurrentHashMap<Integer, Long>());
+            if(!a.blocks.containsKey(airID)) a.blocks.put(airID, 0L);
+            if(!a.heights.containsKey(airID)) a.heights.put(airID, new HashMap<Integer, Long>());
             for(; sectionY < 16; sectionY++) {
-                blockCounter.put(airID, blockCounter.get(airID) + 4096L);
+                a.blocks.put(airID, a.blocks.get(airID) + 4096L);
                 for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
-                    if(heightCounter.get(airID).containsKey(y)) {
-                        heightCounter.get(airID).put(y, heightCounter.get(airID).get(y) + 256L);
+                    if(a.heights.get(airID).containsKey(y)) {
+                        a.heights.get(airID).put(y, a.heights.get(airID).get(y) + 256L);
                     } else {
-                        heightCounter.get(airID).put(y, 256L);
+                        a.heights.get(airID).put(y, 256L);
                     }
                 }
             }

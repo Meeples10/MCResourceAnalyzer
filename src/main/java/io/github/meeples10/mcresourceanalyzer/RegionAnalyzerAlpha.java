@@ -3,13 +3,15 @@ package io.github.meeples10.mcresourceanalyzer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionAnalyzerAlpha extends RegionAnalyzer {
+    final List<File> chunkFiles = new ArrayList<>();
+    private Analysis a = new Analysis();
 
     @Override
     public void validateInput(File world) {
@@ -20,13 +22,7 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
     }
 
     @Override
-    public void findChunks(File input) {
-        // TODO
-    }
-
-    @Override
-    public void analyze(File world) {
-        List<File> chunkFiles = new ArrayList<>();
+    public void findChunks(File world) {
         for(File f : world.listFiles(Main.DS_STORE_FILTER)) {
             if(!f.isDirectory()) continue;
             chunkFiles.addAll(traverseSubdirectories(f));
@@ -36,24 +32,23 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
             System.exit(1);
         }
         Main.println(chunkFiles.size() + " chunks found");
-        int cnum = 1;
+    }
+
+    @Override
+    public void analyze() {
+        int i = 1;
         for(File f : chunkFiles) {
-            long startTime = System.currentTimeMillis();
-            String name = f.getName();
-            System.out.print("Scanning chunk " + name + " [" + cnum + "/" + chunkFiles.size() + "]... ");
+            System.out.print("Scanning chunks [" + i + "/" + chunkFiles.size() + "]\r");
 
             try {
                 processChunk(f);
             } catch(Exception e) {
                 e.printStackTrace();
             }
-
-            Main.println(
-                    "Done (" + String.format("%.2f", (double) (System.currentTimeMillis() - startTime) / 1000) + "s)");
-            cnum++;
+            i++;
         }
-        duration = System.currentTimeMillis() - getStartTime();
-        Main.println(("Completed analysis in " + Main.millisToHMS(duration) + " (" + chunkCount + " chunks)"));
+        blockCounter.putAll(a.blocks);
+        heightCounter.putAll(a.heights);
     }
 
     private void processChunk(File chunkFile) throws Exception {
@@ -88,18 +83,18 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
                                 : Byte.toString(blockID) + ":" + Byte.toString(blockData);
                     }
 
-                    if(blockCounter.containsKey(blockName)) {
-                        blockCounter.put(blockName, blockCounter.get(blockName) + 1L);
+                    if(a.blocks.containsKey(blockName)) {
+                        a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
                     } else {
-                        blockCounter.put(blockName, 1L);
+                        a.blocks.put(blockName, 1L);
                     }
-                    if(!heightCounter.containsKey(blockName)) {
-                        heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
+                    if(!a.heights.containsKey(blockName)) {
+                        a.heights.put(blockName, new HashMap<Integer, Long>());
                     }
-                    if(heightCounter.get(blockName).containsKey(y)) {
-                        heightCounter.get(blockName).put(y, heightCounter.get(blockName).get(y) + 1L);
+                    if(a.heights.get(blockName).containsKey(y)) {
+                        a.heights.get(blockName).put(y, a.heights.get(blockName).get(y) + 1L);
                     } else {
-                        heightCounter.get(blockName).put(y, 1L);
+                        a.heights.get(blockName).put(y, 1L);
                     }
                 }
             }

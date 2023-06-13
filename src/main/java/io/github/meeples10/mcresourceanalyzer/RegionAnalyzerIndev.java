@@ -2,12 +2,17 @@ package io.github.meeples10.mcresourceanalyzer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
+import java.util.HashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionAnalyzerIndev extends RegionAnalyzer {
+    private byte[] blocks = null;
+    private byte[] data = null;
+    private int width = 0;
+    private int height = 0;
 
     @Override
     public void validateInput(File world) {
@@ -19,34 +24,34 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
 
     @Override
     public void findChunks(File world) {
-        // TODO
-    }
-
-    @Override
-    public void analyze(File world) {
+        NBTTagCompound map = null;
         try {
-            processWorld(world);
-        } catch(Exception e) {
+            map = CompressedStreamTools.readCompressed(new FileInputStream(world)).getCompoundTag("Map");
+        } catch(IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
-        duration = System.currentTimeMillis() - getStartTime();
-        Main.println(("Completed analysis in " + Main.millisToHMS(duration)));
-    }
-
-    private void processWorld(File worldFile) throws Exception {
-        NBTTagCompound map = CompressedStreamTools.readCompressed(new FileInputStream(worldFile)).getCompoundTag("Map");
-        int width = map.getInteger("Width");
-        int height = map.getInteger("Height");
-        byte[] blocks = map.getByteArray("Blocks");
+        width = map.getInteger("Width");
+        height = map.getInteger("Height");
+        blocks = map.getByteArray("Blocks");
         byte[] rawData = map.getByteArray("Data");
-        byte[] data = new byte[rawData.length];
+        data = new byte[rawData.length];
         for(int i = 0; i < rawData.length; i++) {
             data[i] = (byte) ((rawData[i] >> 4) & (byte) 0x0F);
         }
-        analyzeWorld(blocks, data, width, height);
     }
 
-    private void analyzeWorld(byte[] blocks, byte[] data, int width, int height) {
+    @Override
+    public void analyze() {
+        Analysis a = analyzeWorld(blocks, data, width, height);
+        duration = System.currentTimeMillis() - getStartTime();
+        Main.println(("Completed analysis in " + Main.millisToHMS(duration)));
+        blockCounter.putAll(a.blocks);
+        heightCounter.putAll(a.heights);
+    }
+
+    private Analysis analyzeWorld(byte[] blocks, byte[] data, int width, int height) {
+        Analysis a = new Analysis();
         for(int y = 0; y < 128; y++) {
             for(int x = 0; x < 16; x++) {
                 for(int z = 0; z < 16; z++) {
@@ -61,21 +66,22 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
                                 : Byte.toString(blockID) + ":" + Byte.toString(blockData);
                     }
 
-                    if(blockCounter.containsKey(blockName)) {
-                        blockCounter.put(blockName, blockCounter.get(blockName) + 1L);
+                    if(a.blocks.containsKey(blockName)) {
+                        a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
                     } else {
-                        blockCounter.put(blockName, 1L);
+                        a.blocks.put(blockName, 1L);
                     }
-                    if(!heightCounter.containsKey(blockName)) {
-                        heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
+                    if(!a.heights.containsKey(blockName)) {
+                        a.heights.put(blockName, new HashMap<Integer, Long>());
                     }
-                    if(heightCounter.get(blockName).containsKey(y)) {
-                        heightCounter.get(blockName).put(y, heightCounter.get(blockName).get(y) + 1L);
+                    if(a.heights.get(blockName).containsKey(y)) {
+                        a.heights.get(blockName).put(y, a.heights.get(blockName).get(y) + 1L);
                     } else {
-                        heightCounter.get(blockName).put(y, 1L);
+                        a.heights.get(blockName).put(y, 1L);
                     }
                 }
             }
         }
+        return a;
     }
 }
