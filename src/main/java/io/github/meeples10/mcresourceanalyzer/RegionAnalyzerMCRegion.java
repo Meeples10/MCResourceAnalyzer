@@ -3,7 +3,7 @@ package io.github.meeples10.mcresourceanalyzer;
 import java.io.DataInputStream;
 import java.io.File;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,12 +11,21 @@ import net.minecraft.nbt.NBTTagCompound;
 public class RegionAnalyzerMCRegion extends RegionAnalyzer {
 
     @Override
-    public void analyze(File regionDir) {
-        int totalRegions = regionDir.listFiles(Main.DS_STORE_FILTER).length;
-        if(totalRegions == 0) {
+    public void validateInput(File regionDir) {
+        if(regionDir.listFiles(Main.DS_STORE_FILTER).length == 0) {
             System.err.println("Error: Region directory is empty");
             System.exit(1);
         }
+    }
+
+    @Override
+    public void findChunks(File regionDir) {
+        // TODO
+    }
+
+    @Override
+    public void analyze(File regionDir) {
+        int totalRegions = regionDir.listFiles(Main.DS_STORE_FILTER).length;
         Main.println(totalRegions + " regions found");
         int rnum = 1;
         for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
@@ -63,7 +72,6 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
             j += 2;
         }
         analyzeChunk(blocks, data);
-        chunkCount++;
     }
 
     private void analyzeChunk(byte[] blocks, byte[] data) {
@@ -87,7 +95,7 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
                         blockCounter.put(blockName, 1L);
                     }
                     if(!heightCounter.containsKey(blockName)) {
-                        heightCounter.put(blockName, new HashMap<Integer, Long>());
+                        heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
                     }
                     if(heightCounter.get(blockName).containsKey(y)) {
                         heightCounter.get(blockName).put(y, heightCounter.get(blockName).get(y) + 1L);

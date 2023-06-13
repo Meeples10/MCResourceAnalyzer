@@ -3,7 +3,7 @@ package io.github.meeples10.mcresourceanalyzer;
 import java.io.DataInputStream;
 import java.io.File;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,18 +13,27 @@ import net.minecraft.nbt.NBTTagLongArray;
 public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
 
     @Override
-    public void analyze(File regionDir) {
-        // The air hack does not seem to work for this region format
-        Main.allowHack = false;
+    public void validateInput(File regionDir) {
         if(!regionDir.exists()) {
             System.err.println("Error: No region directory found at " + regionDir.getAbsolutePath());
             System.exit(1);
         }
-        int totalRegions = regionDir.listFiles(Main.DS_STORE_FILTER).length;
-        if(totalRegions == 0) {
+        if(regionDir.listFiles(Main.DS_STORE_FILTER).length == 0) {
             System.err.println("Error: Region directory is empty");
             System.exit(1);
         }
+    }
+
+    @Override
+    public void findChunks(File regionDir) {
+        // TODO
+    }
+
+    @Override
+    public void analyze(File regionDir) {
+        // The air hack does not seem to work for this version
+        Main.allowHack = false;
+        int totalRegions = regionDir.listFiles(Main.DS_STORE_FILTER).length;
         Main.println(totalRegions + " regions found");
         int rnum = 1;
         for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
@@ -61,7 +70,6 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
         NBTTagList sections = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
                 .getTagList("Sections", 10);
         analyzeChunk(sections);
-        chunkCount++;
     }
 
     private void analyzeChunk(NBTTagList sections) {
@@ -92,7 +100,7 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
                             blockCounter.put(blockName, 1L);
                         }
                         if(!heightCounter.containsKey(blockName)) {
-                            heightCounter.put(blockName, new HashMap<Integer, Long>());
+                            heightCounter.put(blockName, new ConcurrentHashMap<Integer, Long>());
                         }
                         if(heightCounter.get(blockName).containsKey(actualY)) {
                             heightCounter.get(blockName).put(actualY, heightCounter.get(blockName).get(actualY) + 1L);
