@@ -13,8 +13,9 @@ hs_err_pid*
 .settings/
 *.csv
 *.html
-target/
-region/
-region*/
-*.nbt
-*.mclevel
+/target/
+/region/
+/region*/
+/*.nbt
+/*.mclevel
+/*_stats.txt
