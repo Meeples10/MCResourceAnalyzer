@@ -6,8 +6,8 @@ MCResourceAnalyzer gathers data from Minecraft region files to determine the emp
 
 1. Clone the repository and build it with Maven or [download the latest release here](https://github.com/Meeples10/MCResourceAnalyzer/releases).
 2. If your world was generated with a version after Beta 1.3, use the `region` directory from your Minecraft world as the program's input.
-If the world was generated with a version between Infdev 20100327 and Beta 1.2, use the entire world directory to `region` as the program's input.
-If the world was generated with Indev, rename the save file to `world.mclevel` and copy it to the same directory as the program.
+If the world was generated with a version between Infdev 20100327 and Beta 1.2, use the entire world directory as the input.
+If the world was generated with Indev, use the `world.mclevel` file as the input.
 3. Run the program with `java -jar mc-resource-analyzer-x.x.x.jar [options...] [input path]`. After analyzing the world, the program will create a file in the same directory named `data.csv`.
 
 Note that the numbers for `minecraft:air` may be inaccurate at high Y values due to the way Minecraft stores chunks.
@@ -46,7 +46,7 @@ java -jar mc-resource-analyzer-x.x.x.jar [-hHmsStV] [-B=PATH] [-M=PATH] [-o=STRI
 
 ### Version compatibility
 
-MCResourceAnalyzer 1.2.0 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.20.1.
+MCResourceAnalyzer 1.2.1 can analyze worlds generated with any version of Minecraft: Java Edition between Indev 0.31 20100122 and 1.20.1.
 
 Note that Indev worlds with the `Long` and `Deep` world shapes are not supported.
 
