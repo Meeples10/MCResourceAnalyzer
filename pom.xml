@@ -3,7 +3,7 @@
 
     <groupId>io.github.meeples10.mcresourceanalyzer</groupId>
     <artifactId>mc-resource-analyzer</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>MCResourceAnalyzer</name>
@@ -27,6 +27,11 @@
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.leveldbjni</groupId>
+            <artifactId>leveldbjni-all</artifactId>
+            <version>1.8</version>
         </dependency>
     </dependencies>
 

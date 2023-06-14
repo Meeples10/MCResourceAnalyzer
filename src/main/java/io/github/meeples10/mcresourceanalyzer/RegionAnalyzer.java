@@ -262,7 +262,7 @@ public abstract class RegionAnalyzer {
                 }
             }
         }
-        if(version == Version.ANVIL_2021 || version == Version.ANVIL_118) {
+        if(version == Version.ANVIL_2021 || version == Version.ANVIL_118 || version == Version.BEDROCK) {
             return min < 0 ? min : 0;
         } else {
             return 0;
@@ -309,7 +309,8 @@ public abstract class RegionAnalyzer {
         ANVIL_2012(RegionAnalyzerAnvil2012.class, true),
         MCREGION(RegionAnalyzerMCRegion.class, true),
         ALPHA(RegionAnalyzerAlpha.class, true),
-        INDEV(RegionAnalyzerIndev.class, false);
+        INDEV(RegionAnalyzerIndev.class, false),
+        BEDROCK(RegionAnalyzerBedrock.class, true);
 
         private final Class<? extends RegionAnalyzer> analyzerClass;
         private final boolean usesDirectory;
