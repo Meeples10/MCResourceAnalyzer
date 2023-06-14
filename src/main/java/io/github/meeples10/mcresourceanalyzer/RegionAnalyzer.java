@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public abstract class RegionAnalyzer {
     private Version version;
     public int chunkCount = 0;
-    public Map<String, Long> blockCounter = new HashMap<String, Long>();
-    public Map<String, HashMap<Integer, Long>> heightCounter = new HashMap<String, HashMap<Integer, Long>>();
+    public Map<String, Long> blockCounter = new Hashtable<>();
+    public Map<String, Hashtable<Integer, Long>> heightCounter = new Hashtable<>();
     private long firstStartTime;
     public long duration;
     List<Region> regions = new ArrayList<>();
@@ -56,28 +56,11 @@ public abstract class RegionAnalyzer {
                 pool.submit(t);
             }
             pool.shutdown();
+            threads.clear();
             try {
                 pool.awaitTermination(100, TimeUnit.DAYS);
             } catch(InterruptedException e) {
                 e.printStackTrace();
-            }
-            for(AnalyzerThread t : threads) {
-                for(Analysis a : t.analyses) {
-                    for(String s : a.blocks.keySet()) {
-                        blockCounter.put(s, blockCounter.getOrDefault(s, 0L) + a.blocks.get(s));
-                    }
-                    for(String s : a.heights.keySet()) {
-                        if(heightCounter.containsKey(s)) {
-                            Map<Integer, Long> existing = heightCounter.get(s);
-                            Map<Integer, Long> heights = a.heights.get(s);
-                            for(int i : heights.keySet()) {
-                                existing.put(i, existing.getOrDefault(i, 0L) + heights.get(i));
-                            }
-                        } else {
-                            heightCounter.put(s, a.heights.get(s));
-                        }
-                    }
-                }
             }
         }
 
@@ -195,7 +178,7 @@ public abstract class RegionAnalyzer {
             data.append("<table>\n");
         }
         data.append("<tr><th>id</th><th>");
-        for(int i = minY; i < maxY; i++) {
+        for(int i = minY; i <= maxY; i++) {
             data.append(i);
             data.append("</th><th>");
         }
@@ -209,7 +192,7 @@ public abstract class RegionAnalyzer {
             data.append("<td>");
             data.append(Main.modernizeIDs ? Main.getStringID(key) : key);
             data.append("</td>");
-            for(int i = minY; i < maxY; i++) {
+            for(int i = minY; i <= maxY; i++) {
                 if(!heightCounter.get(key).containsKey(i)) {
                     data.append("<td>0</td>");
                 } else {
@@ -256,7 +239,7 @@ public abstract class RegionAnalyzer {
     static void airHack(Analysis a, int sectionY, String airID) {
         if(Main.allowHack && sectionY < 15) {
             if(!a.blocks.containsKey(airID)) a.blocks.put(airID, 0L);
-            if(!a.heights.containsKey(airID)) a.heights.put(airID, new HashMap<Integer, Long>());
+            if(!a.heights.containsKey(airID)) a.heights.put(airID, new Hashtable<Integer, Long>());
             for(; sectionY < 16; sectionY++) {
                 a.blocks.put(airID, a.blocks.get(airID) + 4096L);
                 for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
@@ -270,7 +253,7 @@ public abstract class RegionAnalyzer {
         }
     }
 
-    int getMinimumY() {
+    private int getMinimumY() {
         int min = Integer.MAX_VALUE;
         for(Map<Integer, Long> map : heightCounter.values()) {
             for(int i : map.keySet()) {
@@ -286,7 +269,7 @@ public abstract class RegionAnalyzer {
         }
     }
 
-    int getMaximumY() {
+    private int getMaximumY() {
         int max = Integer.MIN_VALUE;
         for(Map<Integer, Long> map : heightCounter.values()) {
             for(int i : map.keySet()) {
@@ -296,9 +279,26 @@ public abstract class RegionAnalyzer {
             }
         }
         if(version == Version.INDEV || version == Version.ALPHA || version == Version.MCREGION) {
-            return 128;
+            return 127;
         } else {
             return max > 255 ? max : 255;
+        }
+    }
+
+    synchronized void add(Analysis a) {
+        for(String s : a.blocks.keySet()) {
+            blockCounter.put(s, blockCounter.getOrDefault(s, 0L) + a.blocks.get(s));
+        }
+        for(String s : a.heights.keySet()) {
+            if(heightCounter.containsKey(s)) {
+                Map<Integer, Long> existing = heightCounter.get(s);
+                Map<Integer, Long> heights = a.heights.get(s);
+                for(int i : heights.keySet()) {
+                    existing.put(i, existing.getOrDefault(i, 0L) + heights.get(i));
+                }
+            } else {
+                heightCounter.put(s, a.heights.get(s));
+            }
         }
     }
 

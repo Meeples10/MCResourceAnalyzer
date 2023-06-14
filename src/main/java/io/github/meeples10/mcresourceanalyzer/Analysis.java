@@ -1,9 +1,9 @@
 package io.github.meeples10.mcresourceanalyzer;
 
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 public class Analysis {
-    public Map<String, Long> blocks = new HashMap<String, Long>();
-    public Map<String, HashMap<Integer, Long>> heights = new HashMap<String, HashMap<Integer, Long>>();
+    public Map<String, Long> blocks = new Hashtable<>();
+    public Map<String, Hashtable<Integer, Long>> heights = new Hashtable<>();
 }

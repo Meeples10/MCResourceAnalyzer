@@ -3,7 +3,7 @@ package io.github.meeples10.mcresourceanalyzer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Hashtable;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -72,7 +72,7 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
                         a.blocks.put(blockName, 1L);
                     }
                     if(!a.heights.containsKey(blockName)) {
-                        a.heights.put(blockName, new HashMap<Integer, Long>());
+                        a.heights.put(blockName, new Hashtable<Integer, Long>());
                     }
                     if(a.heights.get(blockName).containsKey(y)) {
                         a.heights.get(blockName).put(y, a.heights.get(blockName).get(y) + 1L);
