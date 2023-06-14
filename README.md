@@ -1,6 +1,6 @@
 # Minecraft Resource Analyzer
 
-MCResourceAnalyzer gathers data from Minecraft region files to determine the empirical distribution of naturally-occurring block types. For more information, see [this page](https://meeples10.github.io/resource-distribution).
+MCResourceAnalyzer gathers data from Minecraft region files to determine the empirical distribution of naturally-occurring block types. For more information, see [this page](https://meeples10.github.io/resource-distribution/index.html).
 
 ## Using the program
 
