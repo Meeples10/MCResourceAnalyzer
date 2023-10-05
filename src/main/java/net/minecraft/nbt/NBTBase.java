@@ -71,8 +71,8 @@ public abstract class NBTBase {
         }
     }
 
-    public static String func_193581_j(int p_193581_0_) {
-        switch(p_193581_0_) {
+    public static String getType(int id) {
+        switch(id) {
         case 0:
             return "TAG_End";
 
@@ -132,8 +132,8 @@ public abstract class NBTBase {
         return false;
     }
 
-    public boolean equals(Object p_equals_1_) {
-        return p_equals_1_ instanceof NBTBase && this.getId() == ((NBTBase) p_equals_1_).getId();
+    public boolean equals(Object o) {
+        return o instanceof NBTBase && this.getId() == ((NBTBase) o).getId();
     }
 
     public int hashCode() {

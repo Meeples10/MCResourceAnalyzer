@@ -83,18 +83,16 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
                                 : Byte.toString(blockID) + ":" + Byte.toString(blockData);
                     }
 
-                    if(a.blocks.containsKey(blockName)) {
-                        a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
+                    a.blocks.put(blockName, a.blocks.getOrDefault(blockName, 0L) + 1L);
+                    if(a.heights.containsKey(blockName)) {
+                        a.heights.get(blockName).put(y, a.heights.get(blockName).getOrDefault(y, 0L) + 1L);
                     } else {
-                        a.blocks.put(blockName, 1L);
-                    }
-                    if(!a.heights.containsKey(blockName)) {
-                        a.heights.put(blockName, new Hashtable<Integer, Long>());
-                    }
-                    if(a.heights.get(blockName).containsKey(y)) {
-                        a.heights.get(blockName).put(y, a.heights.get(blockName).get(y) + 1L);
-                    } else {
-                        a.heights.get(blockName).put(y, 1L);
+                        final int yf = y;
+                        a.heights.put(blockName, new Hashtable<Integer, Long>() {
+                            {
+                                put(yf, 1L);
+                            }
+                        });
                     }
                 }
             }

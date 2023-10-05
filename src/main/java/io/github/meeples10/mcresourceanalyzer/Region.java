@@ -6,12 +6,10 @@ import java.util.Set;
 
 class Region {
     public final RegionFile file;
-    public final String name;
     public final Set<Chunk> chunks = new HashSet<>();
 
-    public Region(File file, String name) {
+    public Region(File file) {
         this.file = new RegionFile(file);
-        this.name = name;
     }
 
     public void addChunk(int x, int z) {

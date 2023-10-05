@@ -235,54 +235,47 @@ public abstract class RegionAnalyzer {
         return mergeStates((int) id);
     }
 
-    /* THIS IS A HACK TO ACCOUNT FOR NONEXISTENT SECTIONS AT HIGH Y VALUES */
+    /* THIS IS A HACK TO ACCOUNT FOR MISSING SECTIONS AT HIGH Y VALUES */
     static void airHack(Analysis a, int sectionY, String airID) {
         if(Main.allowHack && sectionY < 15) {
-            if(!a.blocks.containsKey(airID)) a.blocks.put(airID, 0L);
             if(!a.heights.containsKey(airID)) a.heights.put(airID, new Hashtable<Integer, Long>());
             for(; sectionY < 16; sectionY++) {
-                a.blocks.put(airID, a.blocks.get(airID) + 4096L);
+                a.blocks.put(airID, a.blocks.getOrDefault(airID, 0L) + 4096L);
                 for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
-                    if(a.heights.get(airID).containsKey(y)) {
-                        a.heights.get(airID).put(y, a.heights.get(airID).get(y) + 256L);
-                    } else {
-                        a.heights.get(airID).put(y, 256L);
-                    }
+                    a.heights.get(airID).put(y, a.heights.get(airID).getOrDefault(y, 0L) + 256L);
                 }
             }
         }
     }
 
     private int getMinimumY() {
+        if(version != Version.ANVIL_2021 && version != Version.ANVIL_118) {
+            return 0;
+        }
         int min = Integer.MAX_VALUE;
         for(Map<Integer, Long> map : heightCounter.values()) {
-            for(int i : map.keySet()) {
-                if(i < min) {
-                    min = i;
+            for(int y : map.keySet()) {
+                if(y < min) {
+                    min = y;
                 }
             }
         }
-        if(version == Version.ANVIL_2021 || version == Version.ANVIL_118) {
-            return min < 0 ? min : 0;
-        } else {
-            return 0;
-        }
+        return min < 0 ? min : 0;
     }
 
     private int getMaximumY() {
+        if(version == Version.INDEV || version == Version.ALPHA || version == Version.MCREGION) {
+            return 127;
+        }
         int max = Integer.MIN_VALUE;
         for(Map<Integer, Long> map : heightCounter.values()) {
-            for(int i : map.keySet()) {
-                if(i > max) {
-                    max = i;
+            for(int y : map.keySet()) {
+                if(y > max) {
+                    max = y;
                 }
             }
         }
-        if(version == Version.INDEV || version == Version.ALPHA || version == Version.MCREGION) {
-            return 127;
-        } else {
-            return max > 255 ? max : 255;
-        }
+        return max > 255 ? max : 255;
     }
 
     synchronized void add(Analysis a) {
@@ -319,8 +312,8 @@ public abstract class RegionAnalyzer {
             this.usesDirectory = usesDirectory;
         }
 
-        public RegionAnalyzer getAnalyzerInstance() throws InstantiationException, IllegalAccessException {
-            return analyzerClass.newInstance();
+        public RegionAnalyzer getAnalyzerInstance() throws Exception {
+            return analyzerClass.getDeclaredConstructor().newInstance();
         }
 
         public boolean usesDirectory() {

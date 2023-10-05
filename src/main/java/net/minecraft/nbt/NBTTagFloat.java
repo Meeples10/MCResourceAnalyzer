@@ -44,8 +44,8 @@ public class NBTTagFloat extends NBTPrimitive {
         return new NBTTagFloat(this.data);
     }
 
-    public boolean equals(Object p_equals_1_) {
-        return super.equals(p_equals_1_) && this.data == ((NBTTagFloat) p_equals_1_).data;
+    public boolean equals(Object o) {
+        return super.equals(o) && this.data == ((NBTTagFloat) o).data;
     }
 
     public int hashCode() {

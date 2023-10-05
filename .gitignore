@@ -1,6 +1,6 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 *.class
-bin/
+/bin/
 *.jar
 *.war
 *.ear
@@ -8,9 +8,9 @@ bin/
 *.tar.gz
 *.rar
 hs_err_pid*
-.classpath
-.project
-.settings/
+/.classpath
+/.project
+/.settings/
 *.csv
 *.html
 /target/
@@ -19,3 +19,4 @@ hs_err_pid*
 /*.nbt
 /*.mclevel
 /*_stats.txt
+/bedrock/

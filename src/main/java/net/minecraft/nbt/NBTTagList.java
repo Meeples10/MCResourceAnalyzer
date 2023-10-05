@@ -138,9 +138,9 @@ public class NBTTagList extends NBTBase {
         return new NBTTagCompound();
     }
 
-    public int getIntAt(int p_186858_1_) {
-        if(p_186858_1_ >= 0 && p_186858_1_ < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(p_186858_1_);
+    public int getIntAt(int index) {
+        if(index >= 0 && index < this.tagList.size()) {
+            NBTBase nbtbase = this.tagList.get(index);
 
             if(nbtbase.getId() == 3) {
                 return ((NBTTagInt) nbtbase).getInt();
@@ -227,11 +227,11 @@ public class NBTTagList extends NBTBase {
         return nbttaglist;
     }
 
-    public boolean equals(Object p_equals_1_) {
-        if(!super.equals(p_equals_1_)) {
+    public boolean equals(Object o) {
+        if(!super.equals(o)) {
             return false;
         } else {
-            NBTTagList nbttaglist = (NBTTagList) p_equals_1_;
+            NBTTagList nbttaglist = (NBTTagList) o;
             return this.tagType == nbttaglist.tagType && Objects.equals(this.tagList, nbttaglist.tagList);
         }
     }

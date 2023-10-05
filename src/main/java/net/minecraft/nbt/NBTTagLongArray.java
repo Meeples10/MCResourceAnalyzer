@@ -11,20 +11,20 @@ public class NBTTagLongArray extends NBTBase {
 
     NBTTagLongArray() {}
 
-    public NBTTagLongArray(long[] p_i47524_1_) {
-        this.internalArray = p_i47524_1_;
+    public NBTTagLongArray(long[] longs) {
+        this.internalArray = longs;
     }
 
-    public NBTTagLongArray(List<Long> p_i47525_1_) {
-        this(func_193586_a(p_i47525_1_));
+    public NBTTagLongArray(List<Long> longs) {
+        this(fromList(longs));
     }
 
-    private static long[] func_193586_a(List<Long> p_193586_0_) {
-        long[] along = new long[p_193586_0_.size()];
+    private static long[] fromList(List<Long> longs) {
+        long[] along = new long[longs.size()];
 
-        for(int i = 0; i < p_193586_0_.size(); ++i) {
-            Long olong = p_193586_0_.get(i);
-            along[i] = olong == null ? 0L : olong.longValue();
+        for(int i = 0; i < longs.size(); ++i) {
+            Long l = longs.get(i);
+            along[i] = l == null ? 0L : l.longValue();
         }
 
         return along;
@@ -82,9 +82,9 @@ public class NBTTagLongArray extends NBTBase {
         return new NBTTagLongArray(along);
     }
 
-    public boolean equals(Object p_equals_1_) {
-        return super.equals(p_equals_1_)
-                && Arrays.equals(this.internalArray, ((NBTTagLongArray) p_equals_1_).internalArray);
+    public boolean equals(Object o) {
+        return super.equals(o)
+                && Arrays.equals(this.internalArray, ((NBTTagLongArray) o).internalArray);
     }
 
     public int hashCode() {

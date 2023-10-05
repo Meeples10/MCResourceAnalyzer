@@ -16,16 +16,16 @@ public class NBTTagByteArray extends NBTBase {
         this.data = data;
     }
 
-    public NBTTagByteArray(List<Byte> p_i47529_1_) {
-        this(func_193589_a(p_i47529_1_));
+    public NBTTagByteArray(List<Byte> bytes) {
+        this(fromList(bytes));
     }
 
-    private static byte[] func_193589_a(List<Byte> p_193589_0_) {
-        byte[] abyte = new byte[p_193589_0_.size()];
+    private static byte[] fromList(List<Byte> bytes) {
+        byte[] abyte = new byte[bytes.size()];
 
-        for(int i = 0; i < p_193589_0_.size(); ++i) {
-            Byte obyte = p_193589_0_.get(i);
-            abyte[i] = obyte == null ? 0 : obyte.byteValue();
+        for(int i = 0; i < bytes.size(); ++i) {
+            Byte b = bytes.get(i);
+            abyte[i] = b == null ? 0 : b.byteValue();
         }
 
         return abyte;
@@ -77,8 +77,8 @@ public class NBTTagByteArray extends NBTBase {
         return new NBTTagByteArray(abyte);
     }
 
-    public boolean equals(Object p_equals_1_) {
-        return super.equals(p_equals_1_) && Arrays.equals(this.data, ((NBTTagByteArray) p_equals_1_).data);
+    public boolean equals(Object o) {
+        return super.equals(o) && Arrays.equals(this.data, ((NBTTagByteArray) o).data);
     }
 
     public int hashCode() {

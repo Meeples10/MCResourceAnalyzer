@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class NBTTagCompound extends NBTBase {
-    private static final Pattern field_193583_c = Pattern.compile("[A-Za-z0-9._+-]+");
+    private static final Pattern VALID_STRING_REGEX = Pattern.compile("[A-Za-z0-9._+-]+");
     private final Map<String, NBTBase> tagMap = new HashMap<String, NBTBase>();
 
     /**
@@ -200,9 +200,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 99)) {
                 return ((NBTPrimitive) this.tagMap.get(key)).getByte();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return 0;
     }
@@ -215,9 +213,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 99)) {
                 return ((NBTPrimitive) this.tagMap.get(key)).getShort();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return 0;
     }
@@ -230,9 +226,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 99)) {
                 return ((NBTPrimitive) this.tagMap.get(key)).getInt();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return 0;
     }
@@ -245,9 +239,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 99)) {
                 return ((NBTPrimitive) this.tagMap.get(key)).getLong();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return 0L;
     }
@@ -260,9 +252,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 99)) {
                 return ((NBTPrimitive) this.tagMap.get(key)).getFloat();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return 0.0F;
     }
@@ -275,9 +265,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 99)) {
                 return ((NBTPrimitive) this.tagMap.get(key)).getDouble();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return 0.0D;
     }
@@ -290,9 +278,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 8)) {
                 return ((NBTBase) this.tagMap.get(key)).getString();
             }
-        } catch(ClassCastException var3) {
-            ;
-        }
+        } catch(ClassCastException e) {}
 
         return "";
     }
@@ -305,7 +291,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 7)) {
                 return ((NBTTagByteArray) this.tagMap.get(key)).getByteArray();
             }
-        } catch(ClassCastException classcastexception) {
+        } catch(ClassCastException e) {
             return null;
         }
 
@@ -320,7 +306,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 11)) {
                 return ((NBTTagIntArray) this.tagMap.get(key)).getIntArray();
             }
-        } catch(ClassCastException classcastexception) {
+        } catch(ClassCastException e) {
             return null;
         }
 
@@ -336,7 +322,7 @@ public class NBTTagCompound extends NBTBase {
             if(this.hasKey(key, 10)) {
                 return (NBTTagCompound) this.tagMap.get(key);
             }
-        } catch(ClassCastException classcastexception) {
+        } catch(ClassCastException e) {
             return null;
         }
 
@@ -357,7 +343,7 @@ public class NBTTagCompound extends NBTBase {
 
                 return nbttaglist;
             }
-        } catch(ClassCastException classcastexception) {
+        } catch(ClassCastException e) {
             return null;
         }
 
@@ -388,7 +374,7 @@ public class NBTTagCompound extends NBTBase {
                 stringbuilder.append(',');
             }
 
-            stringbuilder.append(func_193582_s(s)).append(':').append(this.tagMap.get(s));
+            stringbuilder.append(escape(s)).append(':').append(this.tagMap.get(s));
         }
 
         return stringbuilder.append('}').toString();
@@ -414,9 +400,8 @@ public class NBTTagCompound extends NBTBase {
         return nbttagcompound;
     }
 
-    public boolean equals(Object p_equals_1_) {
-        return super.equals(p_equals_1_)
-                && Objects.equals(this.tagMap.entrySet(), ((NBTTagCompound) p_equals_1_).tagMap.entrySet());
+    public boolean equals(Object o) {
+        return super.equals(o) && Objects.equals(this.tagMap.entrySet(), ((NBTTagCompound) o).tagMap.entrySet());
     }
 
     public int hashCode() {
@@ -473,7 +458,7 @@ public class NBTTagCompound extends NBTBase {
         }
     }
 
-    protected static String func_193582_s(String p_193582_0_) {
-        return field_193583_c.matcher(p_193582_0_).matches() ? p_193582_0_ : NBTTagString.func_193588_a(p_193582_0_);
+    protected static String escape(String s) {
+        return VALID_STRING_REGEX.matcher(s).matches() ? s : NBTTagString.escape(s);
     }
 }

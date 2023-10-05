@@ -79,9 +79,8 @@ public class RegionFile {
     private static final int SECTOR_INTS = SECTOR_BYTES / 4;
 
     static final int CHUNK_HEADER_SIZE = 5;
-    private static final byte emptySector[] = new byte[4096];
+    private static final byte emptySector[] = new byte[SECTOR_BYTES];
 
-    private final File fileName;
     private RandomAccessFile file;
     private final int offsets[];
     private final int chunkTimestamps[];
@@ -92,9 +91,6 @@ public class RegionFile {
     public RegionFile(File path) {
         offsets = new int[SECTOR_INTS];
         chunkTimestamps = new int[SECTOR_INTS];
-
-        fileName = path;
-        debugln("REGION LOAD " + fileName);
 
         sizeDelta = 0;
 
@@ -167,34 +163,12 @@ public class RegionFile {
         return ret;
     }
 
-    // various small debug printing helpers
-    private void debug(String in) {
-        // System.out.print(in);
-    }
-
-    private void debugln(String in) {
-        debug(in + "\n");
-    }
-
-    private void debug(String mode, int x, int z, String in) {
-        debug("REGION " + mode + " " + fileName.getName() + "[" + x + "," + z + "] = " + in);
-    }
-
-    private void debug(String mode, int x, int z, int count, String in) {
-        debug("REGION " + mode + " " + fileName.getName() + "[" + x + "," + z + "] " + count + "B = " + in);
-    }
-
-    private void debugln(String mode, int x, int z, String in) {
-        debug(mode, x, z, in + "\n");
-    }
-
     /*
      * gets an (uncompressed) stream representing the chunk data returns null if the
      * chunk is not found or an error occurs
      */
     public synchronized DataInputStream getChunkDataInputStream(int x, int z) {
         if(outOfBounds(x, z)) {
-            debugln("READ", x, z, "out of bounds");
             return null;
         }
 
@@ -209,7 +183,6 @@ public class RegionFile {
             int numSectors = offset & 0xFF;
 
             if(sectorNumber + numSectors > sectorFree.size()) {
-                debugln("READ", x, z, "invalid sector");
                 return null;
             }
 
@@ -217,7 +190,6 @@ public class RegionFile {
             int length = file.readInt();
 
             if(length > SECTOR_BYTES * numSectors) {
-                debugln("READ", x, z, "invalid length: " + length + " > 4096 * " + numSectors);
                 return null;
             }
 
@@ -226,20 +198,16 @@ public class RegionFile {
                 byte[] data = new byte[length - 1];
                 file.read(data);
                 DataInputStream ret = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
-                // debug("READ", x, z, " = found");
                 return ret;
             } else if(version == VERSION_DEFLATE) {
                 byte[] data = new byte[length - 1];
                 file.read(data);
                 DataInputStream ret = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)));
-                // debug("READ", x, z, " = found");
                 return ret;
             }
 
-            debugln("READ", x, z, "unknown version " + version);
             return null;
         } catch(IOException e) {
-            debugln("READ", x, z, "exception");
             return null;
         }
     }
@@ -283,7 +251,6 @@ public class RegionFile {
 
             if(sectorNumber != 0 && sectorsAllocated == sectorsNeeded) {
                 /* we can simply overwrite the old sectors */
-                debug("SAVE", x, z, length, "rewrite");
                 write(sectorNumber, data, length);
             } else {
                 /* we need to allocate new sectors */
@@ -315,7 +282,6 @@ public class RegionFile {
 
                 if(runLength >= sectorsNeeded) {
                     /* we found a free space large enough */
-                    debug("SAVE", x, z, length, "reuse");
                     sectorNumber = runStart;
                     setOffset(x, z, (sectorNumber << 8) | sectorsNeeded);
                     for(int i = 0; i < sectorsNeeded; ++i) {
@@ -326,7 +292,6 @@ public class RegionFile {
                     /*
                      * no free space large enough found -- we need to grow the file
                      */
-                    debug("SAVE", x, z, length, "grow");
                     file.seek(file.length());
                     sectorNumber = sectorFree.size();
                     for(int i = 0; i < sectorsNeeded; ++i) {
@@ -347,7 +312,6 @@ public class RegionFile {
 
     /* write a chunk data to the region file at specified sector number */
     private void write(int sectorNumber, byte[] data, int length) throws IOException {
-        debugln(" " + sectorNumber);
         file.seek(sectorNumber * SECTOR_BYTES);
         file.writeInt(length + 1); // chunk length
         file.writeByte(VERSION_DEFLATE); // chunk version number

@@ -21,7 +21,7 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
     @Override
     public void findChunks(File regionDir) {
         for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
-            Region r = new Region(f, Main.formatRegionName(regionDir, f));
+            Region r = new Region(f);
             for(int x = 0; x < 32; x++) {
                 for(int z = 0; z < 32; z++) {
                     if(r.file.hasChunk(x, z)) r.addChunk(x, z);
@@ -53,10 +53,7 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
 
     private Analysis processRegion(RegionFile r, int x, int z) throws IOException {
         DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
-        if(chunkDataInputStream == null) {
-            // Skip malformed chunks
-            return null;
-        }
+        if(chunkDataInputStream == null) return null;
         NBTTagCompound level = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level");
         byte[] blocks = level.getByteArray("Blocks");
         byte[] rawData = level.getByteArray("Data");
@@ -88,18 +85,16 @@ public class RegionAnalyzerMCRegion extends RegionAnalyzer {
                                 : Byte.toString(blockID) + ":" + Byte.toString(blockData);
                     }
 
-                    if(a.blocks.containsKey(blockName)) {
-                        a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
+                    a.blocks.put(blockName, a.blocks.getOrDefault(blockName, 0L) + 1L);
+                    if(a.heights.containsKey(blockName)) {
+                        a.heights.get(blockName).put(y, a.heights.get(blockName).getOrDefault(y, 0L) + 1L);
                     } else {
-                        a.blocks.put(blockName, 1L);
-                    }
-                    if(!a.heights.containsKey(blockName)) {
-                        a.heights.put(blockName, new Hashtable<Integer, Long>());
-                    }
-                    if(a.heights.get(blockName).containsKey(y)) {
-                        a.heights.get(blockName).put(y, a.heights.get(blockName).get(y) + 1L);
-                    } else {
-                        a.heights.get(blockName).put(y, 1L);
+                        final int yf = y;
+                        a.heights.put(blockName, new Hashtable<Integer, Long>() {
+                            {
+                                put(yf, 1L);
+                            }
+                        });
                     }
                 }
             }

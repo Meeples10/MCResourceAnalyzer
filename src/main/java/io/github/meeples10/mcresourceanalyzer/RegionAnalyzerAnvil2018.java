@@ -27,7 +27,7 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
     @Override
     public void findChunks(File regionDir) {
         for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
-            Region r = new Region(f, Main.formatRegionName(regionDir, f));
+            Region r = new Region(f);
             for(int x = 0; x < 32; x++) {
                 for(int z = 0; z < 32; z++) {
                     if(r.file.hasChunk(x, z)) r.addChunk(x, z);
@@ -61,50 +61,41 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
 
     private Analysis processRegion(RegionFile r, int x, int z) throws IOException {
         DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
-        if(chunkDataInputStream == null) {
-            // Skip malformed chunks
-            return null;
-        }
-        NBTTagList sections = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
-                .getTagList("Sections", 10);
-        return analyzeChunk(sections);
+        if(chunkDataInputStream == null) return null;
+        return analyzeChunk(CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
+                .getTagList("Sections", 10));
     }
 
     private Analysis analyzeChunk(NBTTagList sections) {
         Analysis a = new Analysis();
         int i = 0;
         for(; i < sections.tagCount(); i++) {
-            NBTTagCompound tag = sections.getCompoundTagAt(i);
-
-            NBTTagLongArray blockStatesTag = ((NBTTagLongArray) tag.getTag("BlockStates"));
-            long[] blockStates = blockStatesTag == null ? new long[0] : blockStatesTag.get();
-            NBTTagList palette = tag.getTagList("Palette", 10);
+            NBTTagCompound section = sections.getCompoundTagAt(i);
+            NBTTagList palette = section.getTagList("Palette", 10);
             if(palette.hasNoTags()) continue;
+            NBTTagLongArray blockStatesTag = ((NBTTagLongArray) section.getTag("BlockStates"));
             int bitLength = Main.bitLength(palette.tagCount() - 1);
-            bitLength = bitLength < 4 ? 4 : bitLength;
-            int[] blocks = Main.unstream(bitLength, 64, false, blockStates);
-            int sectionY = tag.getByte("Y");
+            int[] blocks = Main.unstream(bitLength < 4 ? 4 : bitLength, 64, false,
+                    blockStatesTag == null ? new long[0] : blockStatesTag.get());
+            int sectionY = section.getByte("Y");
 
             for(int y = 0; y < 16; y++) {
                 for(int x = 0; x < 16; x++) {
                     for(int z = 0; z < 16; z++) {
                         int actualY = sectionY * 16 + y;
-                        int blockIndex = y * 16 * 16 + z * 16 + x;
-                        String block = palette.getStringTagAt(blocks[blockIndex]);
-                        int startIndex = block.indexOf("Name:\"");
-                        String blockName = block.substring(startIndex + 6, block.indexOf('"', startIndex + 6));
-                        if(a.blocks.containsKey(blockName)) {
-                            a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
+                        String blockState = palette.getStringTagAt(blocks[y * 16 * 16 + z * 16 + x]);
+                        int startIndex = blockState.indexOf("Name:\"") + 6;
+                        String blockName = blockState.substring(startIndex, blockState.indexOf('"', startIndex));
+                        a.blocks.put(blockName, a.blocks.getOrDefault(blockName, 0L) + 1L);
+                        if(a.heights.containsKey(blockName)) {
+                            a.heights.get(blockName).put(actualY,
+                                    a.heights.get(blockName).getOrDefault(actualY, 0L) + 1L);
                         } else {
-                            a.blocks.put(blockName, 1L);
-                        }
-                        if(!a.heights.containsKey(blockName)) {
-                            a.heights.put(blockName, new Hashtable<Integer, Long>());
-                        }
-                        if(a.heights.get(blockName).containsKey(actualY)) {
-                            a.heights.get(blockName).put(actualY, a.heights.get(blockName).get(actualY) + 1L);
-                        } else {
-                            a.heights.get(blockName).put(actualY, 1L);
+                            a.heights.put(blockName, new Hashtable<Integer, Long>() {
+                                {
+                                    put(actualY, 1L);
+                                }
+                            });
                         }
                     }
                 }

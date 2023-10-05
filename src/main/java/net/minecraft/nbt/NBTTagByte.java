@@ -44,8 +44,8 @@ public class NBTTagByte extends NBTPrimitive {
         return new NBTTagByte(this.data);
     }
 
-    public boolean equals(Object p_equals_1_) {
-        return super.equals(p_equals_1_) && this.data == ((NBTTagByte) p_equals_1_).data;
+    public boolean equals(Object o) {
+        return super.equals(o) && this.data == ((NBTTagByte) o).data;
     }
 
     public int hashCode() {

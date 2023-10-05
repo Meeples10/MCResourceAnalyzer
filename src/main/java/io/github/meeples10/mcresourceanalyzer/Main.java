@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class Main {
         RegionAnalyzer analyzer;
         try {
             analyzer = selectedVersion.getAnalyzerInstance();
-        } catch(InstantiationException | IllegalAccessException e) {
+        } catch(Exception e) {
             e.printStackTrace();
             System.exit(1);
             return;
@@ -192,41 +193,32 @@ public class Main {
         return 0;
     }
 
-    public static String formatRegionName(File parent, File f) {
-        return f.getPath().split(parent.getName())[1].substring(1);
-    }
-
     /**
      * @author Estragon#9379
-     * 
-     * <p>Many thanks to Estragon#9379 on Discord for this code.</p>
      */
     public static int[] unstream(int bitsPerValue, int wordSize, boolean slack, long[] data) {
         // in: bits per value, word size, ignore spare bits, data
         // out: decoded array
-        List<Integer> out = new ArrayList<Integer>();
         if(slack) {
             wordSize = (int) Math.floor(wordSize / bitsPerValue) * bitsPerValue;
         }
         int bl = 0;
         int v = 0;
+        int[] out = new int[data.length];
+        int size = 0;
         for(int i = 0; i < data.length; i++) {
             for(int n = 0; n < wordSize; n++) {
                 int bit = (int) ((data[i] >> n) & 0x01);
                 v = (bit << bl) | v;
                 bl++;
                 if(bl >= bitsPerValue) {
-                    out.add(v);
+                    out[size++] = v;
                     v = 0;
                     bl = 0;
                 }
             }
         }
-        int[] array = new int[out.size()];
-        for(int i = 0; i < out.size(); i++) {
-            array[i] = out.get(i);
-        }
-        return array;
+        return Arrays.copyOfRange(out, 0, size);
     }
 
     public static int bitLength(int i) {
@@ -273,14 +265,6 @@ public class Main {
         }
     }
 
-    public static String getStringID(String id) {
-        return BLOCK_NAMES.getOrDefault(id, id);
-    }
-
-    public static String getOutputPrefix() {
-        return outputPrefix.equals("") ? "data" : outputPrefix;
-    }
-
     public static List<String> readLines(InputStream stream) throws IOException {
         List<String> lines = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
@@ -290,6 +274,14 @@ public class Main {
         }
         reader.close();
         return lines;
+    }
+
+    public static String getStringID(String id) {
+        return BLOCK_NAMES.getOrDefault(id, id);
+    }
+
+    public static String getOutputPrefix() {
+        return outputPrefix.equals("") ? "data" : outputPrefix;
     }
 
     public static void print(Object s) {

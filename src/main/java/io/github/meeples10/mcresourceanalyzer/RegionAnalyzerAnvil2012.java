@@ -26,7 +26,7 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
     @Override
     public void findChunks(File regionDir) {
         for(File f : regionDir.listFiles(Main.DS_STORE_FILTER)) {
-            Region r = new Region(f, Main.formatRegionName(regionDir, f));
+            Region r = new Region(f);
             for(int x = 0; x < 32; x++) {
                 for(int z = 0; z < 32; z++) {
                     if(r.file.hasChunk(x, z)) r.addChunk(x, z);
@@ -58,13 +58,9 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
 
     private Analysis processRegion(RegionFile r, int x, int z) throws IOException {
         DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
-        if(chunkDataInputStream == null) {
-            // Skip malformed chunks
-            return null;
-        }
-        NBTTagList sections = CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
-                .getTagList("Sections", 10);
-        return analyzeChunk(sections);
+        if(chunkDataInputStream == null) return null;
+        return analyzeChunk(CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
+                .getTagList("Sections", 10));
     }
 
     private Analysis analyzeChunk(NBTTagList sections) {
@@ -100,18 +96,17 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
                             blockName = blockData == 0 ? Integer.toString(blockID)
                                     : Integer.toString(blockID) + ":" + Byte.toString(blockData);
                         }
-                        if(a.blocks.containsKey(blockName)) {
-                            a.blocks.put(blockName, a.blocks.get(blockName) + 1L);
+
+                        a.blocks.put(blockName, a.blocks.getOrDefault(blockName, 0L) + 1L);
+                        if(a.heights.containsKey(blockName)) {
+                            a.heights.get(blockName).put(actualY,
+                                    a.heights.get(blockName).getOrDefault(actualY, 0L) + 1L);
                         } else {
-                            a.blocks.put(blockName, 1L);
-                        }
-                        if(!a.heights.containsKey(blockName)) {
-                            a.heights.put(blockName, new Hashtable<Integer, Long>());
-                        }
-                        if(a.heights.get(blockName).containsKey(actualY)) {
-                            a.heights.get(blockName).put(actualY, a.heights.get(blockName).get(actualY) + 1L);
-                        } else {
-                            a.heights.get(blockName).put(actualY, 1L);
+                            a.heights.put(blockName, new Hashtable<Integer, Long>() {
+                                {
+                                    put(actualY, 1L);
+                                }
+                            });
                         }
                     }
                 }
