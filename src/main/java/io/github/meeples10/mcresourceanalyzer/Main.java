@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,26 +198,30 @@ public class Main {
     public static int[] unstream(int bitsPerValue, int wordSize, boolean slack, long[] data) {
         // in: bits per value, word size, ignore spare bits, data
         // out: decoded array
+        if(data.length == 0) return new int[0];
         if(slack) {
             wordSize = (int) Math.floor(wordSize / bitsPerValue) * bitsPerValue;
         }
+        List<Integer> list = new ArrayList<>();
         int bl = 0;
         int v = 0;
-        int[] out = new int[data.length];
-        int size = 0;
         for(int i = 0; i < data.length; i++) {
             for(int n = 0; n < wordSize; n++) {
                 int bit = (int) ((data[i] >> n) & 0x01);
                 v = (bit << bl) | v;
                 bl++;
                 if(bl >= bitsPerValue) {
-                    out[size++] = v;
+                    list.add(v);
                     v = 0;
                     bl = 0;
                 }
             }
         }
-        return Arrays.copyOfRange(out, 0, size);
+        int[] out = new int[list.size()];
+        for(int i = 0; i < list.size(); i++) {
+            out[i] = list.get(i);
+        }
+        return out;
     }
 
     public static int bitLength(int i) {
