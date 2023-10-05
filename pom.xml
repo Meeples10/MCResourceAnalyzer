@@ -3,7 +3,7 @@
 
     <groupId>io.github.meeples10.mcresourceanalyzer</groupId>
     <artifactId>mc-resource-analyzer</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3</version>
     <packaging>jar</packaging>
 
     <name>MCResourceAnalyzer</name>
