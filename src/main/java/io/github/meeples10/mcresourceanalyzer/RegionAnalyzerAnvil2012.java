@@ -70,6 +70,10 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
             NBTTagCompound tag = sections.getCompoundTagAt(i);
             int sectionY = tag.getByte("Y");
             byte[] blocks = tag.getByteArray("Blocks");
+            if(blocks.length == 0) {
+                airHack(a, i, "0");
+                continue;
+            }
             byte[] rawData = tag.getByteArray("Data");
             byte[] data = new byte[rawData.length * 2];
             int j = 0;
@@ -112,7 +116,6 @@ public class RegionAnalyzerAnvil2012 extends RegionAnalyzer {
                 }
             }
         }
-        airHack(a, i, "0");
         return a;
     }
 }

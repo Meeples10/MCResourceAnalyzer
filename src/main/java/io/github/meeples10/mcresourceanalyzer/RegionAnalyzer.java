@@ -235,15 +235,12 @@ public abstract class RegionAnalyzer {
         return mergeStates((int) id);
     }
 
-    /* THIS IS A HACK TO ACCOUNT FOR MISSING SECTIONS AT HIGH Y VALUES */
     static void airHack(Analysis a, int sectionY, String airID) {
-        if(Main.allowHack && sectionY < 15) {
-            if(!a.heights.containsKey(airID)) a.heights.put(airID, new Hashtable<Integer, Long>());
-            for(; sectionY < 16; sectionY++) {
-                a.blocks.put(airID, a.blocks.getOrDefault(airID, 0L) + 4096L);
-                for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
-                    a.heights.get(airID).put(y, a.heights.get(airID).getOrDefault(y, 0L) + 256L);
-                }
+        if(!a.heights.containsKey(airID)) a.heights.put(airID, new Hashtable<Integer, Long>());
+        for(; sectionY < 16; sectionY++) {
+            a.blocks.put(airID, a.blocks.getOrDefault(airID, 0L) + 4096L);
+            for(int y = sectionY * 16; y < sectionY * 16 + 16; y++) {
+                a.heights.get(airID).put(y, a.heights.get(airID).getOrDefault(y, 0L) + 256L);
             }
         }
     }
@@ -304,8 +301,8 @@ public abstract class RegionAnalyzer {
         ALPHA(RegionAnalyzerAlpha.class, true),
         INDEV(RegionAnalyzerIndev.class, false);
 
+        public final boolean usesDirectory;
         private final Class<? extends RegionAnalyzer> analyzerClass;
-        private final boolean usesDirectory;
 
         private Version(Class<? extends RegionAnalyzer> analyzerClass, boolean usesDirectory) {
             this.analyzerClass = analyzerClass;
@@ -314,10 +311,6 @@ public abstract class RegionAnalyzer {
 
         public RegionAnalyzer getAnalyzerInstance() throws Exception {
             return analyzerClass.getDeclaredConstructor().newInstance();
-        }
-
-        public boolean usesDirectory() {
-            return usesDirectory;
         }
     }
 }

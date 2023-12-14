@@ -60,8 +60,8 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
     private Analysis processRegion(RegionFile r, int x, int z) throws IOException {
         DataInputStream chunkDataInputStream = r.getChunkDataInputStream(x, z);
         if(chunkDataInputStream == null) return null;
-        return analyzeChunk(CompressedStreamTools.read(r.getChunkDataInputStream(x, z)).getCompoundTag("Level")
-                .getTagList("Sections", 10));
+        return analyzeChunk(
+                CompressedStreamTools.read(chunkDataInputStream).getCompoundTag("Level").getTagList("Sections", 10));
     }
 
     private Analysis analyzeChunk(NBTTagList sections) {
@@ -70,11 +70,18 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
         for(; i < sections.tagCount(); i++) {
             NBTTagCompound section = sections.getCompoundTagAt(i);
             NBTTagList palette = section.getTagList("Palette", 10);
-            if(palette.hasNoTags()) continue;
+            if(palette.hasNoTags()) {
+                airHack(a, i, "minecraft:air");
+                continue;
+            }
             NBTTagLongArray blockStatesTag = ((NBTTagLongArray) section.getTag("BlockStates"));
             int bitLength = Main.bitLength(palette.tagCount() - 1);
             int[] blocks = Main.unstream(bitLength < 4 ? 4 : bitLength, 64, true,
                     blockStatesTag == null ? new long[0] : blockStatesTag.get());
+            if(blocks.length == 0) {
+                airHack(a, i, "minecraft:air");
+                continue;
+            }
             int sectionY = section.getByte("Y");
 
             for(int y = 0; y < 16; y++) {
@@ -99,7 +106,6 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
                 }
             }
         }
-        airHack(a, i, "minecraft:air");
         return a;
     }
 }

@@ -39,8 +39,6 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
 
     @Override
     public void analyze() {
-        // The air hack does not seem to work for this version
-        Main.allowHack = false;
         for(Region r : regions) {
             threads.add(new AnalyzerThread(this, r) {
                 public void process() {
@@ -72,11 +70,18 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
         for(; i < sections.tagCount(); i++) {
             NBTTagCompound section = sections.getCompoundTagAt(i);
             NBTTagList palette = section.getTagList("Palette", 10);
-            if(palette.hasNoTags()) continue;
+            if(palette.hasNoTags()) {
+                airHack(a, i, "minecraft:air");
+                continue;
+            }
             NBTTagLongArray blockStatesTag = ((NBTTagLongArray) section.getTag("BlockStates"));
             int bitLength = Main.bitLength(palette.tagCount() - 1);
             int[] blocks = Main.unstream(bitLength < 4 ? 4 : bitLength, 64, false,
                     blockStatesTag == null ? new long[0] : blockStatesTag.get());
+            if(blocks.length == 0) {
+                airHack(a, i, "minecraft:air");
+                continue;
+            }
             int sectionY = section.getByte("Y");
 
             for(int y = 0; y < 16; y++) {
@@ -101,7 +106,6 @@ public class RegionAnalyzerAnvil2018 extends RegionAnalyzer {
                 }
             }
         }
-        airHack(a, i, "minecraft:air");
         return a;
     }
 }

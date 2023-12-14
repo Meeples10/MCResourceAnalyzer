@@ -36,7 +36,6 @@ public class Main {
     static RegionAnalyzer.Version selectedVersion = RegionAnalyzer.Version.values()[0];
     static File inputFile = new File("region");
     static boolean saveStatistics = false;
-    static boolean allowHack = true;
     static boolean generateTable = false;
     static boolean modernizeIDs = false;
     static boolean silent = false;
@@ -62,8 +61,7 @@ public class Main {
         } catch(IOException e) {
             e.printStackTrace();
         }
-        Main.println("Save statistics: " + saveStatistics + "\nAllow empty section hack: " + allowHack
-                + "\nGenerate HTML table: " + generateTable
+        Main.println("Save statistics: " + saveStatistics + "\nGenerate HTML table: " + generateTable
                 + (generateTable
                         ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
                         : "")
@@ -81,8 +79,8 @@ public class Main {
         }
         if(analyzer == null) analyzer = new RegionAnalyzerAnvil118();
         analyzer.setVersion(selectedVersion);
-        if(inputFile.isDirectory() != selectedVersion.usesDirectory()) {
-            System.err.println("Input must be a " + (selectedVersion.usesDirectory() ? "directory" : "file") + ": "
+        if(inputFile.isDirectory() != selectedVersion.usesDirectory) {
+            System.err.println("Input must be a " + (selectedVersion.usesDirectory ? "directory" : "file") + ": "
                     + inputFile.getAbsolutePath());
             System.exit(1);
         }
@@ -127,10 +125,6 @@ public class Main {
                 .description("When analyzing a world with block IDs outside the range of 0-255, any block with an"
                         + "ID listed in this file will have all of its variants merged into a single value..")
                 .build());
-        spec.addOption(OptionSpec.builder("-H", "--no-hack").description(
-                "The program attempts to compensate for inaccuracies at high Y values by assuming that empty chunk"
-                        + "sections are filled with air. Use this option to disable this hack.")
-                .build());
         spec.addOption(OptionSpec.builder("-n", "--num-threads").paramLabel("COUNT").type(int.class)
                 .description("The maximum number of threads to use for analysis. (default: 8)").build());
         spec.addPositional(PositionalParamSpec.builder().paramLabel("INPUT").arity("0..1").type(String.class)
@@ -141,7 +135,6 @@ public class Main {
     private static int parseArgs(ParseResult pr) {
         if(pr.hasMatchedPositional(0)) inputFile = new File((String) pr.matchedPositional(0).getValue());
         saveStatistics = pr.hasMatchedOption('s');
-        allowHack = !pr.hasMatchedOption('H');
         generateTable = pr.hasMatchedOption('t');
         modernizeIDs = pr.hasMatchedOption('m');
         silent = pr.hasMatchedOption('S');
