@@ -31,7 +31,7 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
             System.err.println("Error: World directory is empty");
             System.exit(1);
         }
-        Main.println(chunkFiles.size() + " chunks found");
+        Main.printf("%d chunks found\n", chunkFiles.size());
     }
 
     @Override

@@ -65,14 +65,15 @@ public abstract class RegionAnalyzer {
         }
 
         duration = System.currentTimeMillis() - getStartTime();
-        Main.println("Completed analysis in " + Main.millisToHMS(duration));
+        Main.printf("Completed analysis in %s\n", Main.millisToHMS(duration));
 
         long totalBlocks = 0L;
         for(String key : blockCounter.keySet()) {
             totalBlocks += blockCounter.get(key);
         }
-        Main.println("--------------------------------\n" + blockCounter.size() + " unique blocks\n" + totalBlocks
-                + " blocks total\n--------------------------------");
+        Main.printf(
+                "--------------------------------\n%d unique blocks\n%d blocks total\n--------------------------------\n",
+                blockCounter.size(), totalBlocks);
 
         Main.print("Sorting data... ");
         heightCounter = heightCounter.entrySet().stream().sorted(Map.Entry.comparingByKey(new Comparator<String>() {
@@ -81,7 +82,7 @@ public abstract class RegionAnalyzer {
                 return Long.compare(blockCounter.get(arg1), blockCounter.get(arg0));
             }
         })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-        Main.println("Done");
+        Main.print("Done\n");
 
         double totalExcludingAir = (double) (totalBlocks - (blockCounter.containsKey("0") ? blockCounter.get("0") : 0)
                 - (blockCounter.containsKey("minecraft:air") ? blockCounter.get("minecraft:air") : 0)
@@ -119,11 +120,11 @@ public abstract class RegionAnalyzer {
             }
             data.append("\n");
         }
-        Main.println("Done");
+        Main.print("Done\n");
         try {
             File out = new File(Main.getOutputPrefix() + ".csv");
             Main.writeStringToFile(out, data.toString());
-            Main.println("CSV written to " + out.getAbsolutePath());
+            Main.printf("CSV written to %s\n", out.getAbsolutePath());
         } catch(IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -132,7 +133,7 @@ public abstract class RegionAnalyzer {
             try {
                 File out = new File(Main.getOutputPrefix() + ".html");
                 Main.writeStringToFile(out, generateTable((double) totalBlocks, totalExcludingAir));
-                Main.println("\nTable written to " + out.getAbsolutePath());
+                Main.printf("\nTable written to %s\n", out.getAbsolutePath());
             } catch(IOException e) {
                 e.printStackTrace();
                 System.exit(1);

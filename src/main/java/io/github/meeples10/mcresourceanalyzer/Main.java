@@ -61,14 +61,13 @@ public class Main {
         } catch(IOException e) {
             e.printStackTrace();
         }
-        Main.println("Save statistics: " + saveStatistics + "\nGenerate HTML table: " + generateTable
-                + (generateTable
-                        ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
-                        : "")
-                + "\nRegion version: " + selectedVersion + "\nModernize block IDs: " + modernizeIDs + "\nBlock IDs: "
-                + BLOCK_NAMES.size() + "\nBlock IDs to merge: " + BLOCKS_TO_MERGE.size() + "\nInput: "
-                + inputFile.getPath() + "\nOutput prefix: " + (outputPrefix.equals("") ? "(default)" : outputPrefix)
-                + "\n--------------------------------");
+        Main.printf("Save statistics: %b\nGenerate HTML table: %b%s\nRegion version: %s\nModernize block IDs: %b"
+                + "\nBlock IDs: %d\nBlock IDs to merge: %d\nInput: %s\nOutput prefix: %s\n--------------------------------\n",
+                saveStatistics, generateTable,
+                (generateTable ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
+                        : ""),
+                selectedVersion, modernizeIDs, BLOCK_NAMES.size(), BLOCKS_TO_MERGE.size(), inputFile.getPath(),
+                (outputPrefix.equals("") ? "(default)" : outputPrefix));
         RegionAnalyzer analyzer;
         try {
             analyzer = selectedVersion.getAnalyzerInstance();
@@ -85,7 +84,7 @@ public class Main {
             System.exit(1);
         }
         analyzer.run(inputFile);
-        Main.println("Completed after " + millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
+        Main.printf("Completed after %s\n", millisToHMS(System.currentTimeMillis() - analyzer.getStartTime()));
     }
 
     private static CommandSpec createCommandSpec() {
@@ -282,10 +281,6 @@ public class Main {
 
     public static void print(Object s) {
         if(!silent) System.out.print(s);
-    }
-
-    public static void println(Object s) {
-        if(!silent) System.out.println(s);
     }
 
     public static void printf(String format, Object... args) {

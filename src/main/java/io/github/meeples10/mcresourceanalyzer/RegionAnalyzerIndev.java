@@ -45,7 +45,7 @@ public class RegionAnalyzerIndev extends RegionAnalyzer {
     public void analyze() {
         Analysis a = analyzeWorld(blocks, data, width, height);
         duration = System.currentTimeMillis() - getStartTime();
-        Main.println(("Completed analysis in " + Main.millisToHMS(duration)));
+        Main.printf("Completed analysis in %d\n", Main.millisToHMS(duration));
         blockCounter.putAll(a.blocks);
         heightCounter.putAll(a.heights);
     }
