@@ -139,7 +139,17 @@ public abstract class RegionAnalyzer {
                 System.exit(1);
             }
         }
-        if(Main.saveStatistics) {
+        if(Main.writeJSON) {
+            try {
+                File out = new File(Main.getOutputPrefix() + ".json");
+                Main.writeStringToFile(out, generateJSON(minY, maxY));
+                Main.printf("\nJSON written to %s\n", out.getAbsolutePath());
+            } catch(IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        if(Main.writeStatistics) {
             try {
                 Main.writeStringToFile(new File(Main.getOutputPrefix() + "_stats.txt"),
                         "chunk-count=" + chunkCount + "\nunique-blocks=" + blockCounter.size() + "\ntotal-blocks="
@@ -222,6 +232,22 @@ public abstract class RegionAnalyzer {
         } else {
             return Main.tableTemplate.replace("{{{TABLE}}}", out);
         }
+    }
+
+    public String generateJSON(int minY, int maxY) {
+        StringBuilder sb = new StringBuilder();
+        for(String key : heightCounter.keySet()) {
+            sb.append(",\n\"");
+            sb.append(key);
+            sb.append("\":[");
+            Map<Integer, Long> map = heightCounter.get(key);
+            for(int i = minY; i <= maxY; i++) {
+                sb.append(map.getOrDefault(i, 0L));
+                if(i != maxY) sb.append(",");
+            }
+            sb.append("]");
+        }
+        return "{" + sb.substring(1) + "\n}";
     }
 
     public long getStartTime() {

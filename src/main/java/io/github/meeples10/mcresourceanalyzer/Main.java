@@ -35,7 +35,8 @@ public class Main {
     public static final List<Integer> BLOCKS_TO_MERGE = new ArrayList<>();
     static RegionAnalyzer.Version selectedVersion = RegionAnalyzer.Version.values()[0];
     static File inputFile = new File("region");
-    static boolean saveStatistics = false;
+    static boolean writeStatistics = false;
+    static boolean writeJSON = false;
     static boolean generateTable = false;
     static boolean modernizeIDs = false;
     static boolean silent = false;
@@ -61,13 +62,14 @@ public class Main {
         } catch(IOException e) {
             e.printStackTrace();
         }
-        Main.printf("Save statistics: %b\nGenerate HTML table: %b%s\nRegion version: %s\nModernize block IDs: %b"
-                + "\nBlock IDs: %d\nBlock IDs to merge: %d\nInput: %s\nOutput prefix: %s\n--------------------------------\n",
-                saveStatistics, generateTable,
+        Main.printf(
+                "Write statistics: %b\nGenerate HTML table: %b%s\nWrite JSON: %b\nRegion version: %s\nModernize block IDs: %b"
+                        + "\nBlock IDs: %d\nBlock IDs to merge: %d\nInput: %s\nOutput prefix: %s\n--------------------------------\n",
+                writeStatistics, generateTable,
                 (generateTable ? ("\nTable template: " + (tableTemplatePath.equals("") ? "(none)" : tableTemplatePath))
                         : ""),
-                selectedVersion, modernizeIDs, BLOCK_NAMES.size(), BLOCKS_TO_MERGE.size(), inputFile.getPath(),
-                (outputPrefix.equals("") ? "(default)" : outputPrefix));
+                writeJSON, selectedVersion, modernizeIDs, BLOCK_NAMES.size(), BLOCKS_TO_MERGE.size(),
+                inputFile.getPath(), (outputPrefix.equals("") ? "(default)" : outputPrefix));
         RegionAnalyzer analyzer;
         try {
             analyzer = selectedVersion.getAnalyzerInstance();
@@ -110,6 +112,8 @@ public class Main {
                 .build());
         spec.addOption(OptionSpec.builder("-s", "--statistics")
                 .description("Outputs a file with statistics about the analysis.").build());
+        spec.addOption(OptionSpec.builder("-j", "--json")
+                .description("Outputs a JSON file containing the counts of each block.").build());
         spec.addOption(
                 OptionSpec.builder("-S", "--silent").description("Silences all output aside from errors.").build());
         spec.addOption(OptionSpec.builder("-m", "--modernize-ids")
@@ -133,7 +137,8 @@ public class Main {
 
     private static int parseArgs(ParseResult pr) {
         if(pr.hasMatchedPositional(0)) inputFile = new File((String) pr.matchedPositional(0).getValue());
-        saveStatistics = pr.hasMatchedOption('s');
+        writeStatistics = pr.hasMatchedOption('s');
+        writeJSON = pr.hasMatchedOption('j');
         generateTable = pr.hasMatchedOption('t');
         modernizeIDs = pr.hasMatchedOption('m');
         silent = pr.hasMatchedOption('S');

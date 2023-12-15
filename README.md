@@ -15,12 +15,12 @@ Note that the numbers for `minecraft:air` may be inaccurate at high Y values due
 ### Command line arguments
 
 ```
-java -jar mc-resource-analyzer-x.x.x.jar [-hmsStV] [-B=PATH] [-M=PATH] [-o=STRING] [-T=PATH] [-v=VERSION] [INPUT]
+java -jar mc-resource-analyzer-x.x.x.jar [-hjmsStV] [-B=PATH] [-M=PATH] [-o=STRING] [-T=PATH] [-v=VERSION] [INPUT]
 ```
 
 #### Positional arguments
 
-- `INPUT` (default: `region`): The to the region directory or .mclevel file to analyze. Note that the path is relative to the program's working directory.
+- `INPUT` (default: `region`): The to the region directory or .mclevel file to analyze. Both relative and absolute paths are supported.
 
 #### Options and flags
 
@@ -28,6 +28,7 @@ java -jar mc-resource-analyzer-x.x.x.jar [-hmsStV] [-B=PATH] [-M=PATH] [-o=STRIN
 - `-t`, `--table`: Generates a simple HTML table with the collected data.
 - `-T`, `--table-template`: When used in conjunction with `table`, the generated table will replace any instances of the string `{{{TABLE}}}` in a copy of the template file. Note that the table will not include `<table></table>` tags when using this argument.
 - `-s`, `--statistics`: Outputs a file with statistics about the analysis.
+- `-j`, `--json`: Outputs a JSON file with containing the counts of each block.
 - `-o`, `--output-prefix`: Use this argument to add a prefix to the program's output files. For example, using `-o abc` would result in the files `abc.csv` and `abc_table.html`.
 - `-v`, `--version-select`: Use this argument if you want to analyze a world that was not generated with the latest version of Minecraft. Selecting a version that does not match the version with which the regions were generated may result in unexpected behavior. The following versions are supported:
   - `ANVIL_118` for 1.18 to 1.20.4 (default)
