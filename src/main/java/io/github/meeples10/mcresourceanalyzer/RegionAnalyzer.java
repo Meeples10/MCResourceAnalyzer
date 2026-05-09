@@ -51,7 +51,7 @@ public abstract class RegionAnalyzer {
 
         if(threads.size() > 0) {
             System.out.println();
-            ExecutorService pool = Executors.newFixedThreadPool(Math.min(Main.numThreads, 1024));
+            ExecutorService pool = Executors.newFixedThreadPool(Math.min(Main.threadCount, 1024));
             for(AnalyzerThread t : threads) {
                 pool.submit(t);
             }
@@ -81,7 +81,7 @@ public abstract class RegionAnalyzer {
             public int compare(String arg0, String arg1) {
                 return Long.compare(blockCounter.get(arg1), blockCounter.get(arg0));
             }
-        })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        })).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, _) -> e1, LinkedHashMap::new));
         Main.print("Done\n");
 
         double totalExcludingAir = (double) (totalBlocks - (blockCounter.containsKey("0") ? blockCounter.get("0") : 0)

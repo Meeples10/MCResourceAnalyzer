@@ -5,18 +5,18 @@ import java.util.Hashtable;
 import java.util.Set;
 
 public abstract class AnalyzerThread extends Thread {
-    final RegionAnalyzer ra;
-    final Region r;
+    final RegionAnalyzer regionAnalyzer;
+    final Region region;
     final Set<Analysis> analyses = new HashSet<>();
 
-    public AnalyzerThread(RegionAnalyzer ra, Region region) {
-        this.ra = ra;
-        r = region;
+    public AnalyzerThread(RegionAnalyzer regionAnalyzer, Region region) {
+        this.regionAnalyzer = regionAnalyzer;
+        this.region = region;
     }
 
     public void run() {
         process();
-        ra.add(combineAnalyses());
+        regionAnalyzer.add(combineAnalyses());
     }
 
     public abstract void process();

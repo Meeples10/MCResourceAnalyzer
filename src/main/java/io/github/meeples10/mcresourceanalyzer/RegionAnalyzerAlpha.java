@@ -11,7 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class RegionAnalyzerAlpha extends RegionAnalyzer {
     final List<File> chunkFiles = new ArrayList<>();
-    private Analysis a = new Analysis();
+    private Analysis analysis = new Analysis();
 
     @Override
     public void validateInput(File world) {
@@ -47,8 +47,8 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
             }
             i++;
         }
-        blockCounter.putAll(a.blocks);
-        heightCounter.putAll(a.heights);
+        blockCounter.putAll(analysis.blocks);
+        heightCounter.putAll(analysis.heights);
     }
 
     private void processChunk(File chunkFile) throws Exception {
@@ -83,12 +83,13 @@ public class RegionAnalyzerAlpha extends RegionAnalyzer {
                                 : Byte.toString(blockID) + ":" + Byte.toString(blockData);
                     }
 
-                    a.blocks.put(blockName, a.blocks.getOrDefault(blockName, 0L) + 1L);
-                    if(a.heights.containsKey(blockName)) {
-                        a.heights.get(blockName).put(y, a.heights.get(blockName).getOrDefault(y, 0L) + 1L);
+                    analysis.blocks.put(blockName, analysis.blocks.getOrDefault(blockName, 0L) + 1L);
+                    if(analysis.heights.containsKey(blockName)) {
+                        analysis.heights.get(blockName).put(y,
+                                analysis.heights.get(blockName).getOrDefault(y, 0L) + 1L);
                     } else {
                         final int yf = y;
-                        a.heights.put(blockName, new Hashtable<Integer, Long>() {
+                        analysis.heights.put(blockName, new Hashtable<Integer, Long>() {
                             {
                                 put(yf, 1L);
                             }

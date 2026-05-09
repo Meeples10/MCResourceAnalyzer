@@ -43,7 +43,7 @@ public class Main {
     static String outputPrefix = "";
     static String tableTemplatePath = "";
     static String tableTemplate = "";
-    static int numThreads = 8;
+    static int threadCount = 8;
 
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(createCommandSpec());
@@ -184,7 +184,7 @@ public class Main {
             }
         }
         if(pr.hasMatchedOption('n')) {
-            numThreads = pr.matchedOption('n').getValue();
+            threadCount = pr.matchedOption('n').getValue();
         }
         return 0;
     }

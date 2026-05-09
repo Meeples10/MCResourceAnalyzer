@@ -42,9 +42,9 @@ public class RegionAnalyzerAnvil2021 extends RegionAnalyzer {
         for(Region r : regions) {
             threads.add(new AnalyzerThread(this, r) {
                 public void process() {
-                    for(Chunk c : r.chunks) {
+                    for(Chunk c : region.chunks) {
                         try {
-                            Analysis a = processRegion(r.file, c.x(), c.z());
+                            Analysis a = processRegion(region.file, c.x(), c.z());
                             if(a != null) analyses.add(a);
                             updateProgress();
                         } catch(IOException e) {
